@@ -1,5 +1,5 @@
 const errorHandler = (err, req, res, next) => {
- console.error(`${err.message} - ${req.method} ${req.originalUrl}`, { stack: err.stack });
+  console.error(`${err.message} - ${req.method} ${req.originalUrl}`, { stack: err.stack });
 
   const statusCode = err.statusCode || err.status || 500;
   res.status(statusCode).json({
@@ -8,4 +8,6 @@ const errorHandler = (err, req, res, next) => {
     ...(err.errors && { errors: err.errors }),
     ...(process.env.NODE_ENV !== "production" && { stack: err.stack })
   });
-}
+};
+
+module.exports = errorHandler;
