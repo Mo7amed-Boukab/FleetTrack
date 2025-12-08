@@ -1,0 +1,20 @@
+{
+  "name": "fleet-track",
+  "version": "1.0.0",
+  "description": "FleetTrack est une application de gestion de flotte permettant de suivre les trajets, le carburant, le kilométrage et la maintenance des camions. Elle offre un espace Admin pour la gestion et un espace Chauffeur pour les missions et mises à jour en temps réel",
+  "main": "src/app.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "mongoose": "^9.0.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.11"
+  }
+}
