@@ -5,42 +5,42 @@ class AuthController {
   /**
    * Inscription d'un nouvel utilisateur
    */
-  register = async (req, res, next) => {
-    try {
-      const { fullname, email, password, role, telephone } = req.body;
+  // register = async (req, res, next) => {
+  //   try {
+  //     const { fullname, email, password, role, telephone } = req.body;
 
-      // Vérifier si l'utilisateur existe déjà
-      const existingUser = await User.findOne({ email });
+  //     // Vérifier si l'utilisateur existe déjà
+  //     const existingUser = await User.findOne({ email });
 
-      if (existingUser) {
-        return res.status(400).json({ message: "User already exists" });
-      }
-      // Créer un nouvel utilisateur (le password sera hashé automatiquement par le pre-save hook dans User Model)
-      const newUser = new User({ fullname, email, password, role, telephone });
-      await newUser.save();
+  //     if (existingUser) {
+  //       return res.status(400).json({ message: "User already exists" });
+  //     }
+  //     // Créer un nouvel utilisateur (le password sera hashé automatiquement par le pre-save hook dans User Model)
+  //     const newUser = new User({ fullname, email, password, role, telephone });
+  //     await newUser.save();
 
-      // Générer les tokens
-      const payload = {
-        userId: newUser._id,
-        email: newUser.email,
-        role: newUser.role,
-      };
+  //     // Générer les tokens
+  //     const payload = {
+  //       userId: newUser._id,
+  //       email: newUser.email,
+  //       role: newUser.role,
+  //     };
 
-      const accessToken = generateToken(payload);
-      const refreshToken = generateRefreshToken(payload);
+  //     const accessToken = generateToken(payload);
+  //     const refreshToken = generateRefreshToken(payload);
 
-      res.status(201).json({
-        message: "User registered successfully.",
-        user: newUser.toJSON(),
-        tokens: {
-          accessToken,
-          refreshToken,
-        },
-      });
-    } catch (error) {
-      next(error);
-    }
-  };
+  //     res.status(201).json({
+  //       message: "User registered successfully.",
+  //       user: newUser.toJSON(),
+  //       tokens: {
+  //         accessToken,
+  //         refreshToken,
+  //       },
+  //     });
+  //   } catch (error) {
+  //     next(error);
+  //   }
+  // };
 
   /**
    * Connexion d'un utilisateur

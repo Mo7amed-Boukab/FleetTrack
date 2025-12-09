@@ -5,6 +5,7 @@ const app = express();
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const vehicleRoutes = require('./routes/vehicleRoutes');
+const tripRoutes = require('./routes/tripRoutes');
 
 app.use(express.json());
 
@@ -12,6 +13,7 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/vehicles', vehicleRoutes);
+app.use('/api/trips', tripRoutes);
 
 app.get('/', (req, res) => {
    res.send('FleetTrack API is running ...');
