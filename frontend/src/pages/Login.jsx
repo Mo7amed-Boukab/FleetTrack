@@ -2,46 +2,37 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Truck, Mail, Lock, AlertCircle } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 const Login = () => {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    email: '',
-    password: ''
-  });
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const { login, loading } = useAuth();
+
+  const [error, setError] = useState(null);
+  const [formData, setFormData] = useState({ email: "", password: "" });
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-    setError('');
+    setFormData(prev => ({ ...prev, [name]: value })); 
+    setError(null);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-    setLoading(true);
+    setError(null);
 
-    // Validation simple
     if (!formData.email || !formData.password) {
       setError('Veuillez remplir tous les champs');
-      setLoading(false);
       return;
     }
 
-    // Simulation de connexion
-    setTimeout(() => {
-      if (formData.email && formData.password) {
-        navigate('/dashboard');
-      } else {
-        setError('Email ou mot de passe incorrect');
-      }
-      setLoading(false);
-    }, 1000);
+    const response = await login({ email: formData.email, password: formData.password });
+
+    if (response.success) {
+      navigate('/admin/overview');
+    } else {
+      setError(response.message || 'Email ou mot de passe incorrect');
+    }
   };
 
   return (

@@ -1,11 +1,18 @@
 const errorHandler = require('./middlewares/errorHandlerMiddleware');
 const express = require('express');
+const cors = require('cors');
 const app = express();
 
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const vehicleRoutes = require('./routes/vehicleRoutes');
 const tripRoutes = require('./routes/tripRoutes');
+
+// CORS
+app.use(cors({
+  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  credentials: true
+}));
 
 app.use(express.json());
 

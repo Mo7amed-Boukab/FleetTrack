@@ -21,13 +21,13 @@ const Sidebar = () => {
     {
       title: "GÉNÉRAL",
       items: [
-        { icon: LayoutDashboard, label: "Overview", path: "/overview" },
-        { icon: Truck, label: "Camions", path: "/camions" },
-        { icon: Package, label: "Remorques", path: "/remorques" },
-        { icon: Circle, label: "Pneus", path: "/pneus" },
-        { icon: Route, label: "Trajets", path: "/trajets" },
-        { icon: Users, label: "Chauffeurs", path: "/chauffeurs" },
-         { icon: Settings, label: "Maintenance", path: "/maintenance" },
+        { icon: LayoutDashboard, label: "Overview", path: "/admin/overview" },
+        { icon: Truck, label: "Camions", path: "/admin/camions" },
+        { icon: Package, label: "Remorques", path: "/admin/remorques" },
+        { icon: Circle, label: "Pneus", path: "/admin/pneus" },
+        { icon: Route, label: "Trajets", path: "/admin/trajets" },
+        { icon: Users, label: "Chauffeurs", path: "/admin/chauffeurs" },
+         { icon: Settings, label: "Maintenance", path: "/admin/maintenance" },
       ],
     }
   ];
