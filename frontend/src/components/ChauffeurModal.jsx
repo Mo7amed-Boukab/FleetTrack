@@ -1,6 +1,6 @@
 import { X, User, Mail, Lock, Phone, ChevronDown } from "lucide-react";
 
-const Modal = ({isOpen, onClose, title, formData, errors, onSubmit, onChange }) => {
+const ChauffeurModal = ({isOpen, onClose, title, formData, errors, onSubmit, onChange }) => {
 
   if (!isOpen) return null;
 
@@ -38,8 +38,8 @@ const Modal = ({isOpen, onClose, title, formData, errors, onSubmit, onChange }) 
                 onChange={onChange}
                 className={`w-full pl-10 pr-3 py-2 text-sm border rounded outline-none transition-colors ${
                   errors.fullname
-                    ? "border-red-300 focus:ring-2 focus:ring-red-200"
-                    : "border-gray-300 focus:ring-2 focus:ring-slate-200"
+                    ? "border-red-300 focus:ring-1 focus:ring-red-200"
+                    : "border-gray-300 focus:ring-1 focus:ring-slate-200"
                 }`}
                 placeholder="Ex: Ahmed Benali"
               />
@@ -96,8 +96,8 @@ const Modal = ({isOpen, onClose, title, formData, errors, onSubmit, onChange }) 
                 onChange={onChange}
                 className={`w-full pl-10 pr-3 py-2 text-sm border rounded outline-none transition-colors ${
                   errors.password
-                    ? "border-red-300 focus:ring-2 focus:ring-red-200"
-                    : "border-gray-300 focus:ring-2 focus:ring-slate-200"
+                    ? "border-red-300 focus:ring-1 focus:ring-red-200"
+                    : "border-gray-300 focus:ring-1 focus:ring-slate-200"
                 }`}
                 placeholder="••••••••"
               />
@@ -125,8 +125,8 @@ const Modal = ({isOpen, onClose, title, formData, errors, onSubmit, onChange }) 
                 onChange={onChange}
                 className={`w-full pl-10 pr-3 py-2 text-sm border rounded outline-none transition-colors ${
                   errors.telephone
-                    ? "border-red-300 focus:ring-2 focus:ring-red-200"
-                    : "border-gray-300 focus:ring-2 focus:ring-slate-200"
+                    ? "border-red-300 focus:ring-1 focus:ring-red-200"
+                    : "border-gray-300 focus:ring-1 focus:ring-slate-200"
                 }`}
                 placeholder="+212600000000"
               />
@@ -150,7 +150,7 @@ const Modal = ({isOpen, onClose, title, formData, errors, onSubmit, onChange }) 
                 name="status"
                 value={formData.status}
                 onChange={onChange}
-                className="w-full appearance-none px-3 py-2 text-sm border border-gray-300 rounded outline-none focus:ring-2 focus:ring-slate-200 bg-white cursor-pointer transition-colors"
+                className="w-full appearance-none px-3 py-2 text-sm border border-gray-300 rounded outline-none focus:ring-1 focus:ring-slate-200 bg-white cursor-pointer transition-colors"
               >
                 <option value="active">Actif</option>
                 <option value="inactive">Inactif</option>
@@ -181,4 +181,4 @@ const Modal = ({isOpen, onClose, title, formData, errors, onSubmit, onChange }) 
   );
 };
 
-export default Modal;
+export default ChauffeurModal;

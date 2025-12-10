@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Plus, Search, Mail, Phone, UserCircle, User } from "lucide-react";
 import Header from "../components/Header";
-import Modal from "../components/Modal";
+import ChauffeurModal from "../components/ChauffeurModal";
 
 const ChauffeursPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -189,7 +189,7 @@ const ChauffeursPage = () => {
       </div>
 
       {/* Modal de création */}
-      <Modal
+      <ChauffeurModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         title="Nouveau Chauffeur"
