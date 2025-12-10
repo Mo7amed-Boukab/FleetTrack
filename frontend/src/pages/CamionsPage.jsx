@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Plus, Search, Truck, Tag, Gauge, Calendar } from "lucide-react";
 import Header from "../components/Header";
-import CamionModal from "../components/CamionModal";
+import VehicleModal from "../components/VehicleModal";
 
 const CamionsPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -103,8 +103,7 @@ const CamionsPage = () => {
     if (!validateForm()) {
       return;
     }
-
-   };
+  };
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
@@ -119,7 +118,6 @@ const CamionsPage = () => {
     setErrors({});
   };
 
-
   const getStatusLabel = (status) => {
     const statusMap = {
       available: "Disponible",
@@ -129,7 +127,6 @@ const CamionsPage = () => {
     };
     return statusMap[status] || status;
   };
-
 
   return (
     <div className="flex-1 flex flex-col">
@@ -172,54 +169,52 @@ const CamionsPage = () => {
           </div>
 
           {/* Lignes */}
-          { camions.map((camion) => (
-              <div
-                key={camion._id}
-                className="grid grid-cols-12 gap-4 p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors text-sm"
-              >
-                <div className="col-span-2 flex items-center gap-2">
-                  <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
-                    <Tag className="w-4 h-4 text-gray-600" />
-                  </div>
-                  <span className="font-medium text-gray-900">
-                    {camion.Immatriculation}
-                  </span>
+          {camions.map((camion) => (
+            <div
+              key={camion._id}
+              className="grid grid-cols-12 gap-4 p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors text-sm"
+            >
+              <div className="col-span-2 flex items-center gap-2">
+                <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                  <Tag className="w-4 h-4 text-gray-600" />
                 </div>
-                <div className="col-span-2 flex items-center gap-2 text-gray-600">
-                  <Truck className="w-4 h-4" />
-                  {camion.brand}
-                </div>
-                <div className="col-span-2 flex items-center text-gray-600">
-                  {camion.model}
-                </div>
-                <div className="col-span-1 flex items-center gap-2 text-gray-600">
-                  <Calendar className="w-4 h-4" />
-                  {camion.year || "-"}
-                </div>
-                <div className="col-span-2 flex items-center gap-2 text-gray-600">
-                  <Gauge className="w-4 h-4" />
-                  {camion.mileage.toLocaleString()} km
-                </div>
-                <div className="col-span-2 flex items-center">
-                  <span
-                    className="px-2 py-1 text-xs font-medium rounded text-gray-700 bg-gray-100"
-                  >
-                    {getStatusLabel(camion.status)}
-                  </span>
-                </div>
-                <div className="col-span-1 flex items-center text-gray-600 text-xs">
-                  {new Date(camion.createdAt).toLocaleDateString("fr-FR", {
-                    month: "short",
-                    year: "numeric",
-                  })}
-                </div>
+                <span className="font-medium text-gray-900">
+                  {camion.Immatriculation}
+                </span>
               </div>
-            ))}
+              <div className="col-span-2 flex items-center gap-2 text-gray-600">
+                <Truck className="w-4 h-4" />
+                {camion.brand}
+              </div>
+              <div className="col-span-2 flex items-center text-gray-600">
+                {camion.model}
+              </div>
+              <div className="col-span-1 flex items-center gap-2 text-gray-600">
+                <Calendar className="w-4 h-4" />
+                {camion.year || "-"}
+              </div>
+              <div className="col-span-2 flex items-center gap-2 text-gray-600">
+                <Gauge className="w-4 h-4" />
+                {camion.mileage.toLocaleString()} km
+              </div>
+              <div className="col-span-2 flex items-center">
+                <span className="px-2 py-1 text-xs font-medium rounded text-gray-700 bg-gray-100">
+                  {getStatusLabel(camion.status)}
+                </span>
+              </div>
+              <div className="col-span-1 flex items-center text-gray-600 text-xs">
+                {new Date(camion.createdAt).toLocaleDateString("fr-FR", {
+                  month: "short",
+                  year: "numeric",
+                })}
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 
       {/* Modal de création */}
-      <CamionModal
+      <VehicleModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         title="Nouveau Camion"
@@ -227,6 +222,7 @@ const CamionsPage = () => {
         errors={errors}
         onSubmit={handleSubmit}
         onChange={handleChange}
+        vehicleType="truck"
       />
     </div>
   );

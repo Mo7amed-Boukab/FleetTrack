@@ -1,8 +1,11 @@
 import { X, Truck, Tag, Calendar, Gauge, ChevronDown } from "lucide-react";
 
-const CamionModal = ({ isOpen, onClose, title, formData, errors, onSubmit, onChange }) => {
-
+const VehicleModal = ({ isOpen, onClose, title, formData, errors, onSubmit, onChange, vehicleType }) => {
   if (!isOpen) return null;
+
+  const getVehicleTypeLabel = () => {
+    return vehicleType === "truck" ? "camion" : "remorque";
+  };
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
@@ -20,6 +23,9 @@ const CamionModal = ({ isOpen, onClose, title, formData, errors, onSubmit, onCha
 
         {/* Formulaire */}
         <form onSubmit={onSubmit} className="p-6 space-y-4">
+          {/* Type caché */}
+          <input type="hidden" name="type" value={vehicleType} />
+
           {/* Immatriculation */}
           <div>
             <label
@@ -108,7 +114,11 @@ const CamionModal = ({ isOpen, onClose, title, formData, errors, onSubmit, onCha
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div
+            className={`grid ${
+              vehicleType === "truck" ? "grid-cols-2" : "grid-cols-2"
+            } gap-4`}
+          >
             {/* Année */}
             <div>
               <label
@@ -120,74 +130,100 @@ const CamionModal = ({ isOpen, onClose, title, formData, errors, onSubmit, onCha
               <div className="relative">
                 <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <input
-                  type="number"
+                  type="date"
                   id="year"
                   name="year"
                   value={formData.year}
                   onChange={onChange}
                   className="w-full pl-10 pr-3 py-2 text-sm border border-gray-300 rounded outline-none focus:ring-1 focus:ring-slate-200 transition-colors"
-                  placeholder="Ex: 2020"
-                  min="1990"
-                  max={new Date().getFullYear() + 1}
                 />
               </div>
             </div>
 
-            {/* Kilométrage */}
-            <div>
-              <label
-                htmlFor="mileage"
-                className="block text-sm font-medium text-gray-700 mb-1.5"
-              >
-                Kilométrage (km)
-              </label>
-              <div className="relative">
-                <Gauge className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                <input
-                  type="number"
-                  id="mileage"
-                  name="mileage"
-                  value={formData.mileage}
-                  onChange={onChange}
-                  className={`w-full pl-10 pr-3 py-2 text-sm border rounded outline-none transition-colors ${
-                    errors.mileage
-                      ? "border-red-300 focus:ring-1 focus:ring-red-200"
-                      : "border-gray-300 focus:ring-1 focus:ring-slate-200"
-                  }`}
-                  placeholder="Ex: 125000"
-                  min="0"
-                />
+            {/* Kilométrage - uniquement pour les camions */}
+            {vehicleType === "truck" ? (
+              <div>
+                <label
+                  htmlFor="mileage"
+                  className="block text-sm font-medium text-gray-700 mb-1.5"
+                >
+                  Kilométrage (km)
+                </label>
+                <div className="relative">
+                  <Gauge className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <input
+                    type="number"
+                    id="mileage"
+                    name="mileage"
+                    value={formData.mileage}
+                    onChange={onChange}
+                    className={`w-full pl-10 pr-3 py-2 text-sm border rounded outline-none transition-colors ${
+                      errors.mileage
+                        ? "border-red-300 focus:ring-1 focus:ring-red-200"
+                        : "border-gray-300 focus:ring-1 focus:ring-slate-200"
+                    }`}
+                    placeholder="Ex: 125000"
+                    min="0"
+                  />
+                </div>
+                {errors.mileage && (
+                  <p className="mt-1 text-xs text-red-600">{errors.mileage}</p>
+                )}
               </div>
-              {errors.mileage && (
-                <p className="mt-1 text-xs text-red-600">{errors.mileage}</p>
-              )}
-            </div>
+            ) : (
+              /* Statut pour les remorques */
+              <div>
+                <label
+                  htmlFor="status"
+                  className="block text-sm font-medium text-gray-700 mb-1.5"
+                >
+                  Statut
+                </label>
+                <div className="relative">
+                  <select
+                    id="status"
+                    name="status"
+                    value={formData.status}
+                    onChange={onChange}
+                    className="w-full appearance-none px-3 py-2 text-sm border border-gray-300 rounded outline-none focus:ring-1 focus:ring-slate-200 bg-white cursor-pointer transition-colors"
+                  >
+                    <option value="available">Disponible</option>
+                    <option value="in_transit">En transit</option>
+                    <option value="maintenance">En maintenance</option>
+                    <option value="out_of_service">Hors service</option>
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Statut */}
-          <div>
-            <label
-              htmlFor="status"
-              className="block text-sm font-medium text-gray-700 mb-1.5"
-            >
-              Statut
-            </label>
-            <div className="relative">
-              <select
-                id="status"
-                name="status"
-                value={formData.status}
-                onChange={onChange}
-                className="w-full appearance-none px-3 py-2 text-sm border border-gray-300 rounded outline-none focus:ring-1 focus:ring-slate-200 bg-white cursor-pointer transition-colors"
+          {vehicleType === "truck" && (
+            <div>
+              <label
+                htmlFor="status"
+                className="block text-sm font-medium text-gray-700 mb-1.5"
               >
-                <option value="available">Disponible</option>
-                <option value="in_transit">En transit</option>
-                <option value="maintenance">En maintenance</option>
-                <option value="out_of_service">Hors service</option>
-              </select>
-              <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                Statut
+              </label>
+              <div className="relative">
+                <select
+                  id="status"
+                  name="status"
+                  value={formData.status}
+                  onChange={onChange}
+                  className="w-full appearance-none px-3 py-2 text-sm border border-gray-300 rounded outline-none focus:ring-1 focus:ring-slate-200 bg-white cursor-pointer transition-colors"
+                >
+                  <option value="available">Disponible</option>
+                  <option value="in_transit">En transit</option>
+                  <option value="maintenance">En maintenance</option>
+                  <option value="out_of_service">Hors service</option>
+                </select>
+                <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Boutons */}
           <div className="flex justify-end gap-3 pt-4">
@@ -202,7 +238,7 @@ const CamionModal = ({ isOpen, onClose, title, formData, errors, onSubmit, onCha
               type="submit"
               className="px-5 py-2 text-sm font-medium text-white bg-slate-800 rounded hover:bg-slate-900 hover:cursor-pointer transition-all"
             >
-              Ajouter un Camion
+              Ajouter {getVehicleTypeLabel()}
             </button>
           </div>
         </form>
@@ -211,4 +247,4 @@ const CamionModal = ({ isOpen, onClose, title, formData, errors, onSubmit, onCha
   );
 };
 
-export default CamionModal;
+export default VehicleModal;
