@@ -276,7 +276,7 @@ const ChauffeursPage = () => {
               .map((chauffeur) => (
                 <div
                   key={chauffeur._id}
-                  className="grid grid-cols-12 gap-4 p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors text-sm"
+                  className="grid grid-cols-12 gap-4 p-4 border-b border-gray-100 transition-colors text-sm"
                 >
                   <div className="col-span-2 flex items-center gap-2">
                     <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
@@ -311,7 +311,7 @@ const ChauffeursPage = () => {
                   <div className="col-span-2 flex items-center justify-end gap-2">
                     <button
                       onClick={() => handleEdit(chauffeur)}
-                      className="p-1.5 text-blue-600 rounded hover:bg-blue-50 hover:text-blue-700 transition-colors"
+                      className="p-1.5 text-blue-700 rounded hover:bg-gray-50 hover:text-blue-800 transition-colors"
                       title="Modifier"
                     >
                       <Edit2 className="w-4 h-4" />
@@ -320,7 +320,7 @@ const ChauffeursPage = () => {
                       onClick={() =>
                         handleDelete(chauffeur._id, chauffeur.fullname)
                       }
-                      className="p-1.5 text-red-600 rounded hover:bg-red-50 hover:text-red-700 transition-colors"
+                      className="p-1.5 text-red-700 rounded hover:bg-gray-50 hover:text-red-800 transition-colors"
                       title="Supprimer"
                     >
                       <Trash2 className="w-4 h-4" />
