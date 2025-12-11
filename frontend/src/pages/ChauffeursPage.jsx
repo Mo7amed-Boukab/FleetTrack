@@ -1,13 +1,26 @@
 import { useState, useEffect } from "react";
-import { Plus, Search, Mail, Phone, UserCircle, User } from "lucide-react";
+import {
+  Plus,
+  Search,
+  Mail,
+  Phone,
+  UserCircle,
+  User,
+  Edit2,
+  Trash2,
+} from "lucide-react";
 import Header from "../components/Header";
 import ChauffeurModal from "../components/ChauffeurModal";
+import DeleteConfirmationModal from "../components/DeleteConfirmationModal";
 import userService from "../services/userService";
 
 const ChauffeursPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [editingId, setEditingId] = useState(null);
   const [formData, setFormData] = useState({
     fullname: "",
     email: "",
@@ -61,11 +74,13 @@ const ChauffeursPage = () => {
       newErrors.email = "Email invalide";
     }
 
-    if (!formData.password.trim()) {
-      newErrors.password = "Le mot de passe est requis";
-    } else if (formData.password.length < 6) {
-      newErrors.password =
-        "Le mot de passe doit contenir au moins 6 caractères";
+    if (!editingId) {
+      if (!formData.password.trim()) {
+        newErrors.password = "Le mot de passe est requis";
+      } else if (formData.password.length < 6) {
+        newErrors.password =
+          "Le mot de passe doit contenir au moins 6 caractères";
+      }
     }
 
     if (!formData.telephone.trim()) {
@@ -93,31 +108,37 @@ const ChauffeursPage = () => {
         role: "chauffeur",
       };
 
-      await userService.createUser(userData);
-      await fetchChauffeurs();
+      // En mode édition, ne pas envoyer le password
+      if (editingId) {
+        delete userData.password;
+      }
 
-      setIsModalOpen(false);
-      setFormData({
-        fullname: "",
-        email: "",
-        password: "",
-        telephone: "",
-        status: "active",
-      });
-      setErrors({});
+      if (editingId) {
+        await userService.updateUser(editingId, userData);
+      } else {
+        await userService.createUser(userData);
+      }
+
+      await fetchChauffeurs();
+      handleCloseModal();
     } catch (err) {
-      console.error("Erreur lors de la création du chauffeur:", err);
+      console.error("Erreur lors de la sauvegarde du chauffeur:", err);
 
       if (err.response?.data?.message) {
         setErrors({ submit: err.response.data.message });
       } else {
-        setErrors({ submit: "Erreur lors de la création du chauffeur" });
+        setErrors({
+          submit: editingId
+            ? "Erreur lors de la modification du chauffeur"
+            : "Erreur lors de la création du chauffeur",
+        });
       }
     }
   };
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
+    setEditingId(null);
     setFormData({
       fullname: "",
       email: "",
@@ -126,6 +147,43 @@ const ChauffeursPage = () => {
       status: "active",
     });
     setErrors({});
+  };
+
+  const handleEdit = (chauffeur) => {
+    setEditingId(chauffeur._id);
+    setFormData({
+      fullname: chauffeur.fullname,
+      email: chauffeur.email,
+      password: "",
+      telephone: chauffeur.telephone,
+      status: chauffeur.status,
+    });
+    setIsModalOpen(true);
+  };
+
+  const handleDelete = (id, fullname) => {
+    setDeleteTarget({ id, fullname });
+    setIsDeleteModalOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+
+    try {
+      await userService.deleteUser(deleteTarget.id);
+      await fetchChauffeurs();
+      setIsDeleteModalOpen(false);
+      setDeleteTarget(null);
+    } catch (err) {
+      console.error("Erreur lors de la suppression:", err);
+      setErrors({ submit: "Erreur lors de la suppression du chauffeur" });
+      setIsDeleteModalOpen(false);
+    }
+  };
+
+  const cancelDelete = () => {
+    setIsDeleteModalOpen(false);
+    setDeleteTarget(null);
   };
 
   return (
@@ -173,11 +231,12 @@ const ChauffeursPage = () => {
         <div className="bg-white border border-gray-200 rounded">
           {/* Header du tableau */}
           <div className="grid grid-cols-12 gap-4 p-4 border-b border-gray-200 bg-gray-50 font-medium text-sm text-gray-700">
-            <div className="col-span-3">Nom Complet</div>
+            <div className="col-span-2">Nom Complet</div>
             <div className="col-span-3">Email</div>
             <div className="col-span-2">Téléphone</div>
             <div className="col-span-2">Date de création</div>
-            <div className="col-span-2">Statut</div>
+            <div className="col-span-1">Statut</div>
+            <div className="col-span-2 text-center">Actions</div>
           </div>
 
           {/* Loading */}
@@ -196,12 +255,21 @@ const ChauffeursPage = () => {
           )}
 
           {/* Lignes */}
-          {!loading && !error && chauffeurs.length > 0 && chauffeurs.filter((chauffeur) => {
+          {!loading &&
+            !error &&
+            chauffeurs.length > 0 &&
+            chauffeurs
+              .filter((chauffeur) => {
+                const matchesSearch =
+                  chauffeur.fullname
+                    .toLowerCase()
+                    .includes(searchTerm.toLowerCase()) ||
+                  chauffeur.email
+                    .toLowerCase()
+                    .includes(searchTerm.toLowerCase());
 
-                const matchesSearch = chauffeur.fullname.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                                      chauffeur.email.toLowerCase().includes(searchTerm.toLowerCase());
-
-                const matchesStatus = statusFilter === "all" || chauffeur.status === statusFilter;
+                const matchesStatus =
+                  statusFilter === "all" || chauffeur.status === statusFilter;
 
                 return matchesSearch && matchesStatus;
               })
@@ -210,7 +278,7 @@ const ChauffeursPage = () => {
                   key={chauffeur._id}
                   className="grid grid-cols-12 gap-4 p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors text-sm"
                 >
-                  <div className="col-span-3 flex items-center gap-2">
+                  <div className="col-span-2 flex items-center gap-2">
                     <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
                       <User className="w-4 h-4 text-gray-600" />
                     </div>
@@ -229,7 +297,7 @@ const ChauffeursPage = () => {
                   <div className="col-span-2 flex items-center text-gray-600">
                     {new Date(chauffeur.createdAt).toLocaleDateString("fr-FR")}
                   </div>
-                  <div className="col-span-2 flex items-center">
+                  <div className="col-span-1 flex items-center">
                     <span
                       className={`px-2 py-1 text-xs font-medium rounded ${
                         chauffeur.status === "active"
@@ -239,6 +307,24 @@ const ChauffeursPage = () => {
                     >
                       {chauffeur.status === "active" ? "Actif" : "Inactif"}
                     </span>
+                  </div>
+                  <div className="col-span-2 flex items-center justify-end gap-2">
+                    <button
+                      onClick={() => handleEdit(chauffeur)}
+                      className="p-1.5 text-blue-600 rounded hover:bg-blue-50 hover:text-blue-700 transition-colors"
+                      title="Modifier"
+                    >
+                      <Edit2 className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() =>
+                        handleDelete(chauffeur._id, chauffeur.fullname)
+                      }
+                      className="p-1.5 text-red-600 rounded hover:bg-red-50 hover:text-red-700 transition-colors"
+                      title="Supprimer"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
                   </div>
                 </div>
               ))}
@@ -253,15 +339,25 @@ const ChauffeursPage = () => {
         </div>
       </div>
 
-      {/* Modal de création */}
+      {/* Modal de création/édition */}
       <ChauffeurModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
-        title="Nouveau Chauffeur"
+        title={editingId ? "Modifier Chauffeur" : "Nouveau Chauffeur"}
         formData={formData}
         errors={errors}
         onSubmit={handleSubmit}
         onChange={handleChange}
+        isEditMode={!!editingId}
+      />
+
+      {/* Modal de confirmation de suppression */}
+      <DeleteConfirmationModal
+        isOpen={isDeleteModalOpen}
+        onClose={cancelDelete}
+        onConfirm={confirmDelete}
+        itemName={deleteTarget?.fullname}
+        itemType="le chauffeur"
       />
 
       {/* Erreur de soumission */}

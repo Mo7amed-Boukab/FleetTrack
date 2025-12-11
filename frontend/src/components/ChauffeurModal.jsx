@@ -1,7 +1,15 @@
 import { X, User, Mail, Lock, Phone, ChevronDown } from "lucide-react";
 
-const ChauffeurModal = ({isOpen, onClose, title, formData, errors, onSubmit, onChange }) => {
-
+const ChauffeurModal = ({
+  isOpen,
+  onClose,
+  title,
+  formData,
+  errors,
+  onSubmit,
+  onChange,
+  isEditMode = false,
+}) => {
   if (!isOpen) return null;
 
   return (
@@ -78,34 +86,36 @@ const ChauffeurModal = ({isOpen, onClose, title, formData, errors, onSubmit, onC
             )}
           </div>
 
-          {/* Mot de passe */}
-          <div>
-            <label
-              htmlFor="password"
-              className="block text-sm font-medium text-gray-700 mb-1.5"
-            >
-              Mot de passe
-            </label>
-            <div className="relative">
-              <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <input
-                type="password"
-                id="password"
-                name="password"
-                value={formData.password}
-                onChange={onChange}
-                className={`w-full pl-10 pr-3 py-2 text-sm border rounded outline-none transition-colors ${
-                  errors.password
-                    ? "border-red-300 focus:ring-1 focus:ring-red-200"
-                    : "border-gray-300 focus:ring-1 focus:ring-slate-200"
-                }`}
-                placeholder="••••••••"
-              />
+          {/* Mot de passe - Uniquement en mode création */}
+          {!isEditMode && (
+            <div>
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-700 mb-1.5"
+              >
+                Mot de passe
+              </label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <input
+                  type="password"
+                  id="password"
+                  name="password"
+                  value={formData.password}
+                  onChange={onChange}
+                  className={`w-full pl-10 pr-3 py-2 text-sm border rounded outline-none transition-colors ${
+                    errors.password
+                      ? "border-red-300 focus:ring-1 focus:ring-red-200"
+                      : "border-gray-300 focus:ring-1 focus:ring-slate-200"
+                  }`}
+                  placeholder="••••••••"
+                />
+              </div>
+              {errors.password && (
+                <p className="mt-1 text-xs text-red-600">{errors.password}</p>
+              )}
             </div>
-            {errors.password && (
-              <p className="mt-1 text-xs text-red-600">{errors.password}</p>
-            )}
-          </div>
+          )}
 
           {/* Téléphone */}
           <div>
@@ -164,15 +174,15 @@ const ChauffeurModal = ({isOpen, onClose, title, formData, errors, onSubmit, onC
             <button
               type="button"
               onClick={onClose}
-              className="px-5 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded hover:cursor-pointer transition-all"
+              className="px-5 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition-all"
             >
               Annuler
             </button>
             <button
               type="submit"
-              className="px-5 py-2 text-sm font-medium text-white bg-slate-800 rounded hover:bg-slate-900 hover:cursor-pointer transition-all"
+              className="px-5 py-2 text-sm font-medium text-white bg-slate-800 rounded hover:bg-slate-900 transition-all"
             >
-              Créer le compte
+              {isEditMode ? "Modifier" : "Créer le compte"}
             </button>
           </div>
         </form>
