@@ -8,13 +8,7 @@ class UserController {
      */
     getAllUsers = async (req, res, next) => {
         try {
-            // Possibilité de filtrer par rôle via query params (ex: ?role=chauffeur)
-            const filter = {};
-            if (req.query.role) {
-                filter.role = req.query.role;
-            }
-
-            const users = await User.find(filter).select('-password'); // Exclure le mot de passe
+            const users = await User.find({ role: 'chauffeur' }).select('-password'); // Exclure le mot de passe
             res.status(200).json({
                 success: true,
                 count: users.length,
@@ -70,9 +64,16 @@ class UserController {
                 status
             });
 
-            // Remove password from response
-            const userResponse = user.toObject();
-            delete userResponse.password;
+            const userResponse = {
+               _id: user._id,
+               fullname: user.fullname,
+               email: user.email,
+               role: user.role,
+               telephone: user.telephone,
+               status: user.status,
+               createdAt: user.createdAt,
+               updatedAt: user.updatedAt
+           };
 
             res.status(201).json({
                 success: true,
@@ -91,29 +92,23 @@ class UserController {
      */
     updateUser = async (req, res, next) => {
         try {
-
-            const user = await User.findById(req.params.id);
+            const user = await User.findByIdAndUpdate(
+               req.params.id,
+               req.body,
+               {
+                   new: true,          
+                   runValidators: true
+               }
+            ).select('-password'); 
 
             if (!user) {
-                return res.status(404).json({ message: 'User not found' });
+               return res.status(404).json({ message: 'User not found' });
             }
 
-            const fields = ['fullname', 'email', 'role', 'telephone', 'status', 'password'];
-            fields.forEach(field => {
-                if (req.body[field]) {
-                    user[field] = req.body[field];
-                }
-            });
-
-            await user.save();
-
-            const userResponse = user.toObject();
-            delete userResponse.password;
-
             res.status(200).json({
-                success: true,
-                data: userResponse
-            });
+              success: true,
+              data: user
+         });
 
         } catch (error) {
             next(error);

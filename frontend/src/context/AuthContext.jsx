@@ -27,15 +27,16 @@ const AuthProvider = ({ children }) => {
     try {
       const response = await axios.post("/auth/login", credentials);
       console.log("Réponse de connexion :", response.data);
-      const { token: authToken, user: userData } = response.data;
+      const { tokens, user: userData } = response.data;
 
       // Mettre à jour States
-      setToken(authToken);
+      setToken(tokens.accessToken);
       setUser(userData);
       setIsAuthenticated(true);
 
       // Sauvegarde data dans localStorage
-      localStorage.setItem("token", authToken);
+      localStorage.setItem("token", tokens.accessToken);
+      localStorage.setItem("refreshToken", tokens.refreshToken);
       localStorage.setItem("user", JSON.stringify(userData));
 
       return { success: true, user: userData };
@@ -55,6 +56,7 @@ const AuthProvider = ({ children }) => {
     setUser(null);
     setIsAuthenticated(false);
     localStorage.removeItem("token");
+    localStorage.removeItem("refreshToken");
     localStorage.removeItem("user");
   };
 
