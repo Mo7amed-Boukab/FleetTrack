@@ -257,7 +257,7 @@ const CamionsPage = () => {
           )}
 
           {/* Lignes */}
-          {!loading && !error && camions.length > 0 && CamionsPage.filter((camion) => {
+          {!loading && !error && camions.length > 0 && camions.filter((camion) => {
                 const matchesSearch = camion.Immatriculation.toLowerCase().includes(searchTerm.toLowerCase()) ||
                                       camion.brand.toLowerCase().includes(searchTerm.toLowerCase()) ||
                                       camion.model.toLowerCase().includes(searchTerm.toLowerCase());
