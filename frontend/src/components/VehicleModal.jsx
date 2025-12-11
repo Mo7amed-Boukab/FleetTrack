@@ -1,6 +1,16 @@
 import { X, Truck, Tag, Calendar, Gauge, ChevronDown } from "lucide-react";
 
-const VehicleModal = ({ isOpen, onClose, title, formData, errors, onSubmit, onChange, vehicleType }) => {
+const VehicleModal = ({
+  isOpen,
+  onClose,
+  title,
+  formData,
+  errors,
+  onSubmit,
+  onChange,
+  vehicleType,
+  isEditMode = false,
+}) => {
   if (!isOpen) return null;
 
   const getVehicleTypeLabel = () => {
@@ -238,7 +248,7 @@ const VehicleModal = ({ isOpen, onClose, title, formData, errors, onSubmit, onCh
               type="submit"
               className="px-5 py-2 text-sm font-medium text-white bg-slate-800 rounded hover:bg-slate-900 hover:cursor-pointer transition-all"
             >
-              Ajouter {getVehicleTypeLabel()}
+              {isEditMode ? "Modifier" : "Ajouter"} {getVehicleTypeLabel()}
             </button>
           </div>
         </form>
