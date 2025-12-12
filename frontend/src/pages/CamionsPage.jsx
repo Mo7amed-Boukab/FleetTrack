@@ -327,6 +327,22 @@ const CamionsPage = () => {
               <p>Aucun camion trouvé</p>
             </div>
           )}
+
+          {/* No results after filter */}
+          {!loading && !error && camions.length > 0 && camions.filter((camion) => {
+                const matchesSearch = camion.Immatriculation.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                      camion.brand.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                      camion.model.toLowerCase().includes(searchTerm.toLowerCase());
+
+                const matchesStatus = statusFilter === "all" || camion.status === statusFilter;
+
+                return matchesSearch && matchesStatus;
+              }).length === 0 && (
+            <div className="p-12 text-center text-gray-500">
+              <Search className="w-12 h-12 mx-auto mb-3 text-gray-400" />
+              <p>Aucun résultat trouvé</p>
+            </div>
+          )}
         </div>
       </div>
 

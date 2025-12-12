@@ -1,18 +1,11 @@
-import { useState } from "react";
-import {
-  Plus,
-  Search,
-  Circle,
-  Truck,
-  Tag,
-  Edit2,
-  Trash2,
-  Link,
-} from "lucide-react";
+import { useState, useEffect } from "react";
+import { Plus, Search, Circle, Truck, Tag, Edit2, Trash2, Link } from "lucide-react";
 import Header from "../components/Header";
 import TireModal from "../components/TireModal";
 import AssignTireModal from "../components/AssignTireModal";
 import DeleteConfirmationModal from "../components/DeleteConfirmationModal";
+import tireService from "../services/tireService";
+import vehicleService from "../services/vehicleService";
 
 const PneusPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -24,6 +17,10 @@ const PneusPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [conditionFilter, setConditionFilter] = useState("all");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [pneus, setPneus] = useState([]);
+  const [vehicles, setVehicles] = useState([]);
   const [formData, setFormData] = useState({
     serialNumber: "",
     brand: "",
@@ -32,81 +29,35 @@ const PneusPage = () => {
   });
   const [errors, setErrors] = useState({});
 
-  // Données simulées des pneus
-  const [pneus] = useState([
-    {
-      _id: "1",
-      serialNumber: "TIRE-2024-001",
-      brand: "Michelin",
-      condition: "new",
-      status: "in_stock",
-      vehicle: null,
-      position: "unassigned",
-      createdAt: "2024-01-15",
-    },
-    {
-      _id: "2",
-      serialNumber: "TIRE-2024-002",
-      brand: "Bridgestone",
-      condition: "good",
-      status: "in_use",
-      vehicle: { _id: "v1", Immatriculation: "ABC-1234" },
-      position: "front_left",
-      createdAt: "2024-02-10",
-    },
-    {
-      _id: "3",
-      serialNumber: "TIRE-2024-003",
-      brand: "Continental",
-      condition: "worn",
-      status: "in_use",
-      vehicle: { _id: "v2", Immatriculation: "XYZ-5678" },
-      position: "rear_right",
-      createdAt: "2023-11-20",
-    },
-    {
-      _id: "4",
-      serialNumber: "TIRE-2024-004",
-      brand: "Goodyear",
-      condition: "good",
-      status: "in_stock",
-      vehicle: null,
-      position: "unassigned",
-      createdAt: "2024-03-05",
-    },
-    {
-      _id: "5",
-      serialNumber: "TIRE-2024-005",
-      brand: "Michelin",
-      condition: "critical",
-      status: "retired",
-      vehicle: null,
-      position: "unassigned",
-      createdAt: "2023-08-12",
-    },
-    {
-      _id: "6",
-      serialNumber: "TIRE-2024-006",
-      brand: "Pirelli",
-      condition: "new",
-      status: "in_stock",
-      vehicle: null,
-      position: "spare",
-      createdAt: "2024-05-18",
-    },
-  ]);
+  useEffect(() => {
+    fetchTires();
+    fetchVehicles();
+  }, []);
 
-  // Données simulées des véhicules pour l'assignation
-  const vehicles = [
-    {
-      _id: "v1",
-      Immatriculation: "ABC-1234",
-      brand: "Mercedes",
-      model: "Actros",
-    },
-    { _id: "v2", Immatriculation: "XYZ-5678", brand: "Volvo", model: "FH16" },
-    { _id: "v3", Immatriculation: "DEF-9012", brand: "Scania", model: "R450" },
-  ];
+  const fetchTires = async () => {
+    try {
+      setLoading(true);
+      setError("");
+      const response = await tireService.getAllTires();
+      setPneus(response.data || []);
+    } catch (err) {
+      setError(
+        err.response?.data?.message || "Erreur lors du chargement des pneus"
+      );
+      console.error("Error fetching tires:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchVehicles = async () => {
+    try {
+      const response = await vehicleService.getAllVehicles();
+      setVehicles(response.data || []);
+    } catch (err) {
+      console.error("Error fetching vehicles:", err);
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -131,15 +82,33 @@ const PneusPage = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!validateForm()) {
       return;
     }
 
-    console.log("Pneu ", editingId ? "modifié" : "créé", formData);
-    handleCloseModal();
+    try {
+      setLoading(true);
+      setError("");
+
+      if (editingId) {
+        await tireService.updateTire(editingId, formData);
+      } else {
+        await tireService.createTire(formData);
+      }
+
+      await fetchTires();
+      handleCloseModal();
+    } catch (err) {
+      setError(
+        err.response?.data?.message || "Erreur lors de l'enregistrement"
+      );
+      console.error("Error saving tire:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleCloseModal = () => {
@@ -165,15 +134,27 @@ const PneusPage = () => {
     setIsModalOpen(true);
   };
 
-  const handleDelete = (id, serialNumber) => {
-    setDeleteTarget({ id, serialNumber });
+  const handleDelete = (pneu) => {
+    setDeleteTarget({ id: pneu._id, serialNumber: pneu.serialNumber });
     setIsDeleteModalOpen(true);
   };
 
-  const confirmDelete = () => {
-    console.log("Pneu supprimé:", deleteTarget.id);
-    setIsDeleteModalOpen(false);
-    setDeleteTarget(null);
+  const confirmDelete = async () => {
+    try {
+      setLoading(true);
+      setError("");
+      await tireService.deleteTire(deleteTarget.id);
+      await fetchTires();
+      setIsDeleteModalOpen(false);
+      setDeleteTarget(null);
+    } catch (err) {
+      setError(err.response?.data?.message || "Erreur lors de la suppression");
+      console.error("Error deleting tire:", err);
+      setIsDeleteModalOpen(false);
+      setDeleteTarget(null);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const cancelDelete = () => {
@@ -186,20 +167,25 @@ const PneusPage = () => {
     setIsAssignModalOpen(true);
   };
 
-  const handleAssignSubmit = (e) => {
+  const handleAssignSubmit = async (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
     const vehicleId = formData.get("vehicle");
     const position = formData.get("position");
 
-    console.log("Assigner pneu:", {
-      tireId: selectedTire._id,
-      vehicleId,
-      position,
-    });
-
-    setIsAssignModalOpen(false);
-    setSelectedTire(null);
+    try {
+      setLoading(true);
+      setError("");
+      await tireService.assignTire(selectedTire._id, { vehicleId, position });
+      await fetchTires();
+      setIsAssignModalOpen(false);
+      setSelectedTire(null);
+    } catch (err) {
+      setError(err.response?.data?.message || "Erreur lors de l'assignation");
+      console.error("Error assigning tire:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const getStatusLabel = (status) => {
@@ -246,11 +232,72 @@ const PneusPage = () => {
     return matchesSearch && matchesStatus && matchesCondition;
   });
 
+  // Calcul des statistiques
+  const totalPneus = pneus.length;
+  const pneusEnStock = pneus.filter((p) => p.status === "in_stock").length;
+  const pneusEnUtilisation = pneus.filter((p) => p.status === "in_use").length;
+  const pneusConditionCritique = pneus.filter(
+    (p) => p.condition === "critical"
+  ).length;
+
   return (
     <div className="flex-1 flex flex-col">
       <Header title="Pneus" description="Suivi et gestion des pneus" />
 
       <div className="flex-1 p-6 bg-gray-50">
+        {/* Message d'erreur */}
+        {error && (
+          <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded text-red-700 text-sm">
+            {error}
+          </div>
+        )}
+
+        {/* Statistiques */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          <div className="bg-white p-6 rounded border border-gray-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-600">Total pneus</p>
+                <p className="text-2xl font-medium text-gray-600">{totalPneus}</p>
+              </div>
+              <Circle className="w-10 h-10 text-slate-600" />
+            </div>
+          </div>
+          <div className="bg-white p-6 rounded border border-gray-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-600">En stock</p>
+                <p className="text-2xl font-medium text-gray-600">
+                  {pneusEnStock}
+                </p>
+              </div>
+              <Circle className="w-10 h-10 text-green-700" />
+            </div>
+          </div>
+          <div className="bg-white p-6 rounded border border-gray-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-600">En utilisation</p>
+                <p className="text-2xl font-medium text-gray-600">
+                  {pneusEnUtilisation}
+                </p>
+              </div>
+              <Circle className="w-10 h-10 text-blue-900" />
+            </div>
+          </div>
+          <div className="bg-white p-6 rounded border border-gray-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-600">Condition critique</p>
+                <p className="text-2xl font-medium text-gray-600">
+                  {pneusConditionCritique}
+                </p>
+              </div>
+              <Circle className="w-10 h-10 text-red-700" />
+            </div>
+          </div>
+        </div>
+
         {/* Header avec recherche, filtres et bouton */}
         <div className="mb-6 flex flex-col gap-4">
           <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
@@ -316,7 +363,12 @@ const PneusPage = () => {
           </div>
 
           {/* Lignes */}
-          {filteredPneus.length > 0 ? (
+          {loading ? (
+            <div className="p-12 text-center text-gray-500">
+              <Circle className="w-12 h-12 mx-auto mb-3 text-gray-400 animate-spin" />
+              <p>Chargement des pneus...</p>
+            </div>
+          ) : filteredPneus.length > 0 ? (
             filteredPneus.map((pneu) => (
               <div
                 key={pneu._id}
@@ -380,10 +432,14 @@ const PneusPage = () => {
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
-
                 </div>
               </div>
             ))
+          ) : filteredPneus.length === 0 && pneus.length > 0 ? (
+            <div className="p-12 text-center text-gray-500">
+              <Search className="w-12 h-12 mx-auto mb-3 text-gray-400" />
+                  <p>Aucun résultat trouvé</p>
+            </div>
           ) : (
             <div className="p-12 text-center text-gray-500">
               <Circle className="w-12 h-12 mx-auto mb-3 text-gray-400" />

@@ -336,6 +336,27 @@ const ChauffeursPage = () => {
               <p>Aucun chauffeur trouvé</p>
             </div>
           )}
+
+          {/* No results after filter */}
+          {!loading && !error && chauffeurs.length > 0 && chauffeurs.filter((chauffeur) => {
+                const matchesSearch =
+                  chauffeur.fullname
+                    .toLowerCase()
+                    .includes(searchTerm.toLowerCase()) ||
+                  chauffeur.email
+                    .toLowerCase()
+                    .includes(searchTerm.toLowerCase());
+
+                const matchesStatus =
+                  statusFilter === "all" || chauffeur.status === statusFilter;
+
+                return matchesSearch && matchesStatus;
+              }).length === 0 && (
+            <div className="p-12 text-center text-gray-500">
+              <Search className="w-12 h-12 mx-auto mb-3 text-gray-400" />
+              <p>Aucun résultat trouvé</p>         
+            </div>
+          )}
         </div>
       </div>
 

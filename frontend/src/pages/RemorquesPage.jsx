@@ -324,6 +324,30 @@ const RemorquesPage = () => {
               <p>Aucune remorque trouvée</p>
             </div>
           )}
+
+          {/* No results after filter */}
+          {!loading && !error && remorques.length > 0 && remorques.filter((remorque) => {
+                const matchesSearch =
+                  remorque.Immatriculation.toLowerCase().includes(
+                    searchTerm.toLowerCase()
+                  ) ||
+                  remorque.brand
+                    .toLowerCase()
+                    .includes(searchTerm.toLowerCase()) ||
+                  remorque.model
+                    .toLowerCase()
+                    .includes(searchTerm.toLowerCase());
+
+                const matchesStatus =
+                  statusFilter === "all" || remorque.status === statusFilter;
+
+                return matchesSearch && matchesStatus;
+              }).length === 0 && (
+            <div className="p-12 text-center text-gray-500">
+              <Search className="w-12 h-12 mx-auto mb-3 text-gray-400" />
+                 <p>Aucun résultat trouvé</p>
+            </div>
+          )}
         </div>
       </div>
 
