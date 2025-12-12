@@ -1,30 +1,27 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Plus,
   Search,
   MapPin,
   Calendar,
   User,
-  Truck,
-  Package,
   Clock,
   CheckCircle,
-  XCircle,
   PlayCircle,
   Edit2,
   Trash2,
-  Eye,
 } from "lucide-react";
 import Header from "../components/Header";
 import DeleteConfirmationModal from "../components/DeleteConfirmationModal";
 import TripModal from "../components/TripModal";
+import tripService from "../services/tripService";
+import userService from "../services/userService";
+import vehicleService from "../services/vehicleService";
 
 const TrajetsPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
-  const [selectedTrip, setSelectedTrip] = useState(null);
   const [editingId, setEditingId] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -39,165 +36,72 @@ const TrajetsPage = () => {
     status: "planned",
   });
   const [errors, setErrors] = useState({});
+  const [trajets, setTrajets] = useState([]);
+  const [drivers, setDrivers] = useState([]);
+  const [trucks, setTrucks] = useState([]);
+  const [trailers, setTrailers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Données simulées
-  const [trajets] = useState([
-    {
-      _id: "1",
-      driver: {
-        _id: "d1",
-        fullname: "Ahmed Benali",
-        telephone: "+212 6 12 34 56 78",
-      },
-      truck: {
-        _id: "t1",
-        Immatriculation: "ABC-1234",
-        brand: "Mercedes",
-        model: "Actros",
-      },
-      trailer: {
-        _id: "tr1",
-        Immatriculation: "XYZ-5678",
-        brand: "Schmitz",
-        model: "Cargobull",
-      },
-      departure: {
-        location: "Casablanca",
-        date: "2024-12-10T08:00:00",
-        mileage: 125000,
-      },
-      arrival: {
-        location: "Marrakech",
-        date: "2024-12-10T12:30:00",
-        mileage: 125250,
-      },
-      status: "completed",
-      fuelConsumed: 45,
-      cargoDetails: {
-        description: "Produits alimentaires",
-        weight: 8500,
-      },
-      createdAt: "2024-12-09T10:00:00",
-    },
-    {
-      _id: "2",
-      driver: {
-        _id: "d2",
-        fullname: "Youssef Alami",
-        telephone: "+212 6 23 45 67 89",
-      },
-      truck: {
-        _id: "t2",
-        Immatriculation: "DEF-5678",
-        brand: "Volvo",
-        model: "FH16",
-      },
-      trailer: null,
-      departure: {
-        location: "Tanger",
-        date: "2024-12-11T14:00:00",
-        mileage: 89000,
-      },
-      arrival: {
-        location: "Fès",
-        date: null,
-        mileage: null,
-      },
-      status: "in_progress",
-      fuelConsumed: null,
-      cargoDetails: {
-        description: "Matériaux de construction",
-        weight: 12000,
-      },
-      createdAt: "2024-12-10T09:00:00",
-    },
-    {
-      _id: "3",
-      driver: {
-        _id: "d3",
-        fullname: "Fatima Zahra",
-        telephone: "+212 6 34 56 78 90",
-      },
-      truck: {
-        _id: "t3",
-        Immatriculation: "GHI-9012",
-        brand: "Scania",
-        model: "R450",
-      },
-      trailer: {
-        _id: "tr2",
-        Immatriculation: "JKL-3456",
-        brand: "Krone",
-        model: "Profi Liner",
-      },
-      departure: {
-        location: "Rabat",
-        date: "2024-12-13T06:00:00",
-        mileage: 67000,
-      },
-      arrival: {
-        location: "Agadir",
-        date: null,
-        mileage: null,
-      },
-      status: "planned",
-      fuelConsumed: null,
-      cargoDetails: {
-        description: "Équipements électroniques",
-        weight: 5000,
-      },
-      createdAt: "2024-12-11T15:00:00",
-    },
-    {
-      _id: "4",
-      driver: {
-        _id: "d1",
-        fullname: "Ahmed Benali",
-        telephone: "+212 6 12 34 56 78",
-      },
-      truck: {
-        _id: "t1",
-        Immatriculation: "ABC-1234",
-        brand: "Mercedes",
-        model: "Actros",
-      },
-      trailer: null,
-      departure: {
-        location: "Marrakech",
-        date: "2024-12-08T07:00:00",
-        mileage: 124500,
-      },
-      arrival: {
-        location: "Casablanca",
-        date: "2024-12-08T11:00:00",
-        mileage: 124750,
-      },
-      status: "cancelled",
-      fuelConsumed: null,
-      cargoDetails: {
-        description: "Trajet annulé - problème mécanique",
-        weight: 0,
-      },
-      createdAt: "2024-12-07T16:00:00",
-    },
-  ]);
+  // Fetch initial data
+  useEffect(() => {
+    fetchAllData();
+  }, []);
 
-  const drivers = [
-    { _id: "d1", fullname: "Ahmed Benali" },
-    { _id: "d2", fullname: "Youssef Alami" },
-    { _id: "d3", fullname: "Fatima Zahra" },
-  ];
+  const fetchAllData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      await Promise.all([fetchTrips(), fetchDrivers(), fetchVehicles()]);
+    } catch (err) {
+      setError(
+        err.response?.data?.message || "Erreur lors du chargement des données"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  const trucks = [
-    { _id: "t1", Immatriculation: "ABC-1234", brand: "Mercedes" },
-    { _id: "t2", Immatriculation: "DEF-5678", brand: "Volvo" },
-    { _id: "t3", Immatriculation: "GHI-9012", brand: "Scania" },
-  ];
+  const fetchTrips = async () => {
+    try {
+      const response = await tripService.getAllTrips();
+      console.log("Trajets chargés:", response.data);
+      setTrajets(response.data || []);
+    } catch (err) {
+      console.error("Erreur lors du chargement des trajets:", err);
+      throw err;
+    }
+  };
 
-  const trailers = [
-    { _id: "tr1", Immatriculation: "XYZ-5678", brand: "Schmitz" },
-    { _id: "tr2", Immatriculation: "JKL-3456", brand: "Krone" },
-  ];
+  const fetchDrivers = async () => {
+    try {
+      const response = await userService.getAllUsers();
+      const driversList = response.data.filter(
+        (user) => user.role === "chauffeur"
+      );
+      console.log("Chauffeurs chargés:", driversList);
+      setDrivers(driversList);
+    } catch (err) {
+      console.error("Erreur lors du chargement des chauffeurs:", err);
+      throw err;
+    }
+  };
+
+  const fetchVehicles = async () => {
+    try {
+      const [trucksResponse, trailersResponse] = await Promise.all([
+        vehicleService.getAllVehicles("truck"),
+        vehicleService.getAllVehicles("trailer"),
+      ]);
+      console.log("Camions chargés:", trucksResponse.data);
+      console.log("Remorques chargées:", trailersResponse.data);
+      setTrucks(trucksResponse.data || []);
+      setTrailers(trailersResponse.data || []);
+    } catch (err) {
+      console.error("Erreur lors du chargement des véhicules:", err);
+      throw err;
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -223,15 +127,44 @@ const TrajetsPage = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!validateForm()) {
       return;
     }
 
-    console.log("Trajet ", editingId ? "modifié" : "créé", formData);
-    handleCloseModal();
+    try {
+      const tripData = {
+        driver: formData.driver,
+        truck: formData.truck,
+        trailer: formData.trailer || null,
+        departure: {
+          location: formData.departureLocation,
+          date: formData.departureDate,
+        },
+        arrival: {
+          location: formData.arrivalLocation,
+          date: formData.arrivalDate || null,
+        },
+        status: formData.status,
+      };
+
+      if (editingId) {
+        await tripService.updateTrip(editingId, tripData);
+      } else {
+        await tripService.createTrip(tripData);
+      }
+
+      await fetchTrips();
+      handleCloseModal();
+    } catch (err) {
+      setErrors({
+        submit:
+          err.response?.data?.message ||
+          "Erreur lors de l'enregistrement du trajet",
+      });
+    }
   };
 
   const handleCloseModal = () => {
@@ -273,20 +206,23 @@ const TrajetsPage = () => {
     setIsDeleteModalOpen(true);
   };
 
-  const confirmDelete = () => {
-    console.log("Trajet supprimé:", deleteTarget.id);
-    setIsDeleteModalOpen(false);
-    setDeleteTarget(null);
+  const confirmDelete = async () => {
+    try {
+      await tripService.deleteTrip(deleteTarget.id);
+      await fetchTrips();
+      setIsDeleteModalOpen(false);
+      setDeleteTarget(null);
+    } catch (err) {
+      setError(
+        err.response?.data?.message || "Erreur lors de la suppression du trajet"
+      );
+      setIsDeleteModalOpen(false);
+    }
   };
 
   const cancelDelete = () => {
     setIsDeleteModalOpen(false);
     setDeleteTarget(null);
-  };
-
-  const handleViewDetails = (trajet) => {
-    setSelectedTrip(trajet);
-    setIsDetailsModalOpen(true);
   };
 
   const getStatusBadge = (status) => {
@@ -451,94 +387,111 @@ const TrajetsPage = () => {
           </div>
         </div>
 
-        {/* Liste des trajets */}
-        <div className="bg-white border border-gray-200 rounded">
-          {/* Header du tableau */}
-          <div className="grid grid-cols-12 gap-4 p-4 border-b border-gray-200 bg-gray-50 font-medium text-sm text-gray-700">
-            <div className="col-span-2">Chauffeur</div>
-            <div className="col-span-2">Véhicule</div>
-            <div className="col-span-2">Départ</div>
-            <div className="col-span-2">Arrivée</div>
-            <div className="col-span-1">Date</div>
-            <div className="col-span-1">Statut</div>
-            <div className="col-span-2 text-right">Actions</div>
+        {/* Messages d'erreur et chargement */}
+        {error && (
+          <div className="mb-6 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded">
+            {error}
           </div>
+        )}
 
-          {/* Lignes */}
-          {filteredTrajets.length > 0 ? (
-            filteredTrajets.map((trajet) => (
-              <div
-                key={trajet._id}
-                className="grid grid-cols-12 gap-4 p-4 border-b border-gray-100 transition-colors text-sm"
-              >
-                <div className="col-span-2 flex items-center gap-2">
-                  <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
-                    <User className="w-4 h-4 text-gray-600" />
-                  </div>
-                  <span className="font-medium text-gray-900">
-                    {trajet.driver.fullname}
-                  </span>
-                </div>
-                <div className="col-span-2 flex items-center gap-2 text-gray-600">
-                  <div>
-                    <div className="font-medium">
-                      {trajet.truck.Immatriculation}
+        {loading ? (
+          <div className="bg-white border border-gray-200 rounded p-12 text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-slate-800 mx-auto"></div>
+            <p className="mt-4 text-gray-600">Chargement des trajets...</p>
+          </div>
+        ) : (
+          /* Liste des trajets */
+          <div className="bg-white border border-gray-200 rounded">
+            {/* Header du tableau */}
+            <div className="grid grid-cols-12 gap-4 p-4 border-b border-gray-200 bg-gray-50 font-medium text-sm text-gray-700">
+              <div className="col-span-2">Chauffeur</div>
+              <div className="col-span-2">Véhicule</div>
+              <div className="col-span-2">Départ</div>
+              <div className="col-span-2">Arrivée</div>
+              <div className="col-span-1">Date</div>
+              <div className="col-span-1">Statut</div>
+              <div className="col-span-2 text-right">Actions</div>
+            </div>
+
+            {/* Lignes */}
+            {filteredTrajets.length > 0 ? (
+              filteredTrajets.map((trajet) => (
+                <div
+                  key={trajet._id}
+                  className="grid grid-cols-12 gap-4 p-4 border-b border-gray-100 transition-colors text-sm"
+                >
+                  <div className="col-span-2 flex items-center gap-2">
+                    <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                      <User className="w-4 h-4 text-gray-600" />
                     </div>
-                    {trajet.trailer && (
-                      <div className="text-xs text-gray-500">
-                        + {trajet.trailer.Immatriculation}
+                    <span className="font-medium text-gray-900">
+                      {trajet.driver.fullname}
+                    </span>
+                  </div>
+                  <div className="col-span-2 flex items-center gap-2 text-gray-600">
+                    <div>
+                      <div className="font-medium">
+                        {trajet.truck.Immatriculation}
                       </div>
+                      {trajet.trailer && (
+                        <div className="text-xs text-gray-500">
+                          + {trajet.trailer.Immatriculation}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <div className="col-span-2 flex items-center gap-2 text-gray-600">
+                    <MapPin className="w-4 h-4" />
+                    {trajet.departure.location}
+                  </div>
+                  <div className="col-span-2 flex items-center gap-2 text-gray-600">
+                    <MapPin className="w-4 h-4 text-slate-800" />
+                    {trajet.arrival.location}
+                  </div>
+                  <div className="col-span-1 flex items-center gap-2 text-gray-600">
+                    <Calendar className="w-4 h-4" />
+                    {new Date(trajet.departure.date).toLocaleDateString(
+                      "fr-FR",
+                      {
+                        day: "2-digit",
+                        month: "2-digit",
+                      }
                     )}
                   </div>
+                  <div className="col-span-1 flex items-center">
+                    {getStatusBadge(trajet.status)}
+                  </div>
+                  <div className="col-span-2 flex items-center justify-end gap-2">
+                    <button
+                      onClick={() => handleEdit(trajet)}
+                      className="p-1.5 text-blue-700 rounded hover:bg-gray-50 hover:text-bleu-800 transition-colors"
+                      title="Modifier"
+                    >
+                      <Edit2 className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(trajet)}
+                      className="p-1.5 text-red-700 rounded hover:bg-gray-50 hover:text-red-800 transition-colors"
+                      title="Supprimer"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
-                <div className="col-span-2 flex items-center gap-2 text-gray-600">
-                  <MapPin className="w-4 h-4" />
-                  {trajet.departure.location}
-                </div>
-                <div className="col-span-2 flex items-center gap-2 text-gray-600">
-                  <MapPin className="w-4 h-4 text-slate-800" />
-                  {trajet.arrival.location}
-                </div>
-                <div className="col-span-1 flex items-center gap-2 text-gray-600">
-                  <Calendar className="w-4 h-4" />
-                  {new Date(trajet.departure.date).toLocaleDateString("fr-FR", {
-                    day: "2-digit",
-                    month: "2-digit",
-                  })}
-                </div>
-                <div className="col-span-1 flex items-center">
-                  {getStatusBadge(trajet.status)}
-                </div>
-                <div className="col-span-2 flex items-center justify-end gap-2">
-                  <button
-                    onClick={() => handleEdit(trajet)}
-                    className="p-1.5 text-blue-700 rounded hover:bg-gray-50 hover:text-bleu-800 transition-colors"
-                    title="Modifier"
-                  >
-                    <Edit2 className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() => handleDelete(trajet)}
-                    className="p-1.5 text-red-700 rounded hover:bg-gray-50 hover:text-red-800 transition-colors"
-                    title="Supprimer"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
+              ))
+            ) : filteredTrajets.length === 0 && trajets.length > 0 ? (
+              <div className="p-12 text-center text-gray-500">
+                <Search className="w-12 h-12 mx-auto mb-3 text-gray-400" />
+                <p>Aucun résultat trouvé</p>
               </div>
-            ))
-          ) : filteredTrajets.length === 0 && trajets.length > 0 ? (
-            <div className="p-12 text-center text-gray-500">
-              <Search className="w-12 h-12 mx-auto mb-3 text-gray-400" />
-              <p>Aucun résultat trouvé</p>
-            </div>
-          ) : (
-            <div className="p-12 text-center text-gray-500">
-              <MapPin className="w-12 h-12 mx-auto mb-3 text-gray-400" />
-              <p>Aucun trajet trouvé</p>
-            </div>
-          )}
-        </div>
+            ) : (
+              <div className="p-12 text-center text-gray-500">
+                <MapPin className="w-12 h-12 mx-auto mb-3 text-gray-400" />
+                <p>Aucun trajet trouvé</p>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Modal de création/édition */}
@@ -555,8 +508,6 @@ const TrajetsPage = () => {
         trailers={trailers}
         isEditMode={!!editingId}
       />
-
-      {/* Modal détails */}
 
       {/* Modal de confirmation de suppression */}
       <DeleteConfirmationModal
