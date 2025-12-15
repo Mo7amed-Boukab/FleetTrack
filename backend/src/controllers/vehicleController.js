@@ -1,4 +1,5 @@
 const Vehicle = require("../models/Vehicle");
+const Tire = require("../models/Tire");
 const { checkAndUpdateMaintenance } = require("../utils/maintenanceRules");
 
 class VehicleController {
@@ -132,6 +133,33 @@ class VehicleController {
 
       if (!vehicle) {
         return res.status(404).json({ message: "Vehicle not found" });
+      }
+
+      // Vérifier si des pneus sont en mauvais état (worn ou critical)
+      const badTires = await Tire.find({
+        vehicle: vehicle._id,
+        status: "in_use",
+        condition: { $in: ["worn", "critical"] },
+      });
+
+      // Si des pneus sont en mauvais état, les marquer comme "remplacés" (statut: in_stock, condition: good)
+      if (badTires.length > 0) {
+        // Mettre à jour tous les pneus en mauvais état
+        await Tire.updateMany(
+          {
+            vehicle: vehicle._id,
+            status: "in_use",
+            condition: { $in: ["worn", "critical"] },
+          },
+          {
+            $set: {
+              status: "in_stock",
+              condition: "good",
+              vehicle: null,
+              position: null,
+            },
+          }
+        );
       }
 
       // Mettre à jour les infos de maintenance

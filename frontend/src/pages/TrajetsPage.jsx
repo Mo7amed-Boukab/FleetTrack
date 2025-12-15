@@ -303,7 +303,7 @@ const TrajetsPage = () => {
         description="Planification et suivi des trajets"
       />
 
-      <div className="flex-1 p-6 bg-gray-50">
+      <div className="flex-1 p-4 lg:p-6 bg-gray-50">
         {/* Statistiques */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
           <div className="bg-white border border-gray-200 rounded p-6">
@@ -415,16 +415,16 @@ const TrajetsPage = () => {
           </div>
         ) : (
           /* Liste des trajets */
-          <div className="bg-white border border-gray-200 rounded">
+          <div className="bg-white border border-gray-200 rounded overflow-x-auto">
             {/* Header du tableau */}
-            <div className="grid grid-cols-12 gap-4 p-4 border-b border-gray-200 bg-gray-50 font-medium text-sm text-gray-700">
+            <div className="grid grid-cols-12 gap-4 p-4 border-b border-gray-200 bg-gray-50 font-medium text-sm text-gray-700 min-w-[1200px]">
               <div className="col-span-2">Chauffeur</div>
               <div className="col-span-2">Véhicule</div>
               <div className="col-span-2">Départ</div>
-              <div className="col-span-2">Arrivée</div>
-              <div className="col-span-1">Date</div>
+              <div className="col-span-2">Date de départ</div>
+              <div className="col-span-2">Date d'arrivée</div>
               <div className="col-span-1">Statut</div>
-              <div className="col-span-2 text-right">Actions</div>
+              <div className="col-span-1 text-right">Actions</div>
             </div>
 
             {/* Lignes */}
@@ -432,7 +432,7 @@ const TrajetsPage = () => {
               filteredTrajets.map((trajet) => (
                 <div
                   key={trajet._id}
-                  className="grid grid-cols-12 gap-4 p-4 border-b border-gray-100 transition-colors text-sm"
+                  className="grid grid-cols-12 gap-4 p-4 border-b border-gray-100 transition-colors text-sm min-w-[1200px]"
                 >
                   <div className="col-span-2 flex items-center gap-2">
                     <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
@@ -456,26 +456,73 @@ const TrajetsPage = () => {
                   </div>
                   <div className="col-span-2 flex items-center gap-2 text-gray-600">
                     <MapPin className="w-4 h-4" />
-                    {trajet.departure.location}
+                    <div>
+                      <div className="font-medium text-gray-900">
+                        {trajet.departure.location}
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        → {trajet.arrival.location}
+                      </div>
+                    </div>
                   </div>
                   <div className="col-span-2 flex items-center gap-2 text-gray-600">
-                    <MapPin className="w-4 h-4 text-slate-800" />
-                    {trajet.arrival.location}
+                    <Calendar className="w-4 h-4 text-green-700" />
+                    <div className="text-xs">
+                      <div className="font-medium text-gray-900">
+                        {new Date(trajet.departure.date).toLocaleDateString(
+                          "fr-FR",
+                          {
+                            day: "2-digit",
+                            month: "short",
+                            year: "numeric",
+                          }
+                        )}
+                      </div>
+                      <div className="text-gray-500">
+                        {new Date(trajet.departure.date).toLocaleTimeString(
+                          "fr-FR",
+                          {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          }
+                        )}
+                      </div>
+                    </div>
                   </div>
-                  <div className="col-span-1 flex items-center gap-2 text-gray-600">
-                    <Calendar className="w-4 h-4" />
-                    {new Date(trajet.departure.date).toLocaleDateString(
-                      "fr-FR",
-                      {
-                        day: "2-digit",
-                        month: "2-digit",
-                      }
-                    )}
+                  <div className="col-span-2 flex items-center gap-2 text-gray-600">
+                    <Calendar className="w-4 h-4 text-red-700" />
+                    <div className="text-xs">
+                      {trajet.arrival.date ? (
+                        <>
+                          <div className="font-medium text-gray-900">
+                            {new Date(trajet.arrival.date).toLocaleDateString(
+                              "fr-FR",
+                              {
+                                day: "2-digit",
+                                month: "short",
+                                year: "numeric",
+                              }
+                            )}
+                          </div>
+                          <div className="text-gray-500">
+                            {new Date(trajet.arrival.date).toLocaleTimeString(
+                              "fr-FR",
+                              {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              }
+                            )}
+                          </div>
+                        </>
+                      ) : (
+                        <div className="text-gray-500">N/A</div>
+                      )}
+                    </div>
                   </div>
                   <div className="col-span-1 flex items-center">
                     {getStatusBadge(trajet.status)}
                   </div>
-                  <div className="col-span-2 flex items-center justify-end gap-2">
+                  <div className="col-span-1 flex items-center justify-end gap-2">
                     <button
                       onClick={() => handleEdit(trajet)}
                       className="p-1.5 text-blue-700 rounded hover:bg-gray-50 hover:text-bleu-800 transition-colors"

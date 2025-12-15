@@ -1,5 +1,14 @@
 import { useState, useEffect } from "react";
-import { Plus, Search, Circle, Truck, Tag, Edit2, Trash2, Link } from "lucide-react";
+import {
+  Plus,
+  Search,
+  Circle,
+  Truck,
+  Tag,
+  Edit2,
+  Trash2,
+  Link,
+} from "lucide-react";
 import Header from "../components/Header";
 import TireModal from "../components/TireModal";
 import AssignTireModal from "../components/AssignTireModal";
@@ -244,7 +253,7 @@ const PneusPage = () => {
     <div className="flex-1 flex flex-col">
       <Header title="Pneus" description="Suivi et gestion des pneus" />
 
-      <div className="flex-1 p-6 bg-gray-50">
+      <div className="flex-1 p-4 lg:p-6 bg-gray-50">
         {/* Message d'erreur */}
         {error && (
           <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded text-red-700 text-sm">
@@ -258,7 +267,9 @@ const PneusPage = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Total pneus</p>
-                <p className="text-2xl font-medium text-gray-600">{totalPneus}</p>
+                <p className="text-2xl font-medium text-gray-600">
+                  {totalPneus}
+                </p>
               </div>
               <Circle className="w-10 h-10 text-slate-600" />
             </div>
@@ -348,18 +359,16 @@ const PneusPage = () => {
         </div>
 
         {/* Liste des pneus */}
-        <div className="bg-white border border-gray-200 rounded">
+        <div className="bg-white border border-gray-200 rounded overflow-x-auto lg:overflow-visible">
           {/* Header du tableau */}
-          <div className="border-b border-gray-200 bg-gray-50 font-medium text-sm text-gray-700 p-4">
-            <div className="grid grid-cols-14 gap-4 mb-2">
-              <div className="col-span-2">Numéro de série</div>
-              <div className="col-span-2">Marque</div>
-              <div className="col-span-2">Condition</div>
-              <div className="col-span-2">Statut</div>
-              <div className="col-span-2">Véhicule</div>
-              <div className="col-span-2">Position</div>
-              <div className="col-span-2 text-center">Actions</div>
-            </div>
+          <div className="grid grid-cols-14 gap-4 p-4 border-b border-gray-200 bg-gray-50 font-medium text-sm text-gray-700 min-w-[1300px] lg:min-w-0">
+            <div className="col-span-2">Numéro de série</div>
+            <div className="col-span-2">Marque</div>
+            <div className="col-span-2">Condition</div>
+            <div className="col-span-2">Statut</div>
+            <div className="col-span-2">Véhicule</div>
+            <div className="col-span-2">Position</div>
+            <div className="col-span-2 text-center">Actions</div>
           </div>
 
           {/* Lignes */}
@@ -372,7 +381,7 @@ const PneusPage = () => {
             filteredPneus.map((pneu) => (
               <div
                 key={pneu._id}
-                className="grid grid-cols-14 gap-4 p-4 border-b border-gray-100 transition-colors text-sm"
+                className="grid grid-cols-14 gap-4 p-4 border-b border-gray-100 transition-colors text-sm min-w-[1300px] lg:min-w-0"
               >
                 <div className="col-span-2 flex items-center gap-2">
                   <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
@@ -438,7 +447,7 @@ const PneusPage = () => {
           ) : filteredPneus.length === 0 && pneus.length > 0 ? (
             <div className="p-12 text-center text-gray-500">
               <Search className="w-12 h-12 mx-auto mb-3 text-gray-400" />
-                  <p>Aucun résultat trouvé</p>
+              <p>Aucun résultat trouvé</p>
             </div>
           ) : (
             <div className="p-12 text-center text-gray-500">

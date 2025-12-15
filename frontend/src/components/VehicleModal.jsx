@@ -18,11 +18,13 @@ const VehicleModal = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded w-full max-w-2xl shadow-lg">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 overflow-y-auto">
+      <div className="bg-white rounded w-full max-w-2xl shadow-lg my-8 max-h-[90vh] flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
+        <div className="flex items-center justify-between p-4 lg:p-6 border-b border-gray-200 flex-shrink-0">
+          <h2 className="text-base lg:text-lg font-semibold text-gray-900">
+            {title}
+          </h2>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 transition-colors"
@@ -32,7 +34,10 @@ const VehicleModal = ({
         </div>
 
         {/* Formulaire */}
-        <form onSubmit={onSubmit} className="p-6 space-y-4">
+        <form
+          onSubmit={onSubmit}
+          className="p-4 lg:p-6 space-y-4 overflow-y-auto flex-1"
+        >
           {/* Type caché */}
           <input type="hidden" name="type" value={vehicleType} />
 
@@ -238,17 +243,17 @@ const VehicleModal = ({
           )}
 
           {/* Boutons */}
-          <div className="flex justify-end gap-3 pt-4">
+          <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4 flex-shrink-0 border-t border-gray-200 -mx-4 lg:-mx-6 px-4 lg:px-6 mt-4 pt-4">
             <button
               type="button"
               onClick={onClose}
-              className="px-5 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded hover:cursor-pointer transition-all"
+              className="w-full sm:w-auto px-5 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded hover:cursor-pointer transition-all"
             >
               Annuler
             </button>
             <button
               type="submit"
-              className="px-5 py-2 text-sm font-medium text-white bg-slate-800 rounded hover:bg-slate-900 hover:cursor-pointer transition-all"
+              className="w-full sm:w-auto px-5 py-2 text-sm font-medium text-white bg-slate-800 rounded hover:bg-slate-900 hover:cursor-pointer transition-all"
             >
               {isEditMode ? "Modifier" : "Ajouter"} {getVehicleTypeLabel()}
             </button>

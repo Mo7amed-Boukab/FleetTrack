@@ -190,7 +190,7 @@ const ChauffeursPage = () => {
     <div className="flex-1 flex flex-col">
       <Header title="Chauffeurs" description="Gestion des chauffeurs" />
 
-      <div className="flex-1 p-6 bg-gray-50">
+      <div className="flex-1 p-4 lg:p-6 bg-gray-50">
         {/* Header avec recherche, filtre et bouton */}
         <div className="mb-6 flex flex-col gap-4">
           <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
@@ -228,9 +228,9 @@ const ChauffeursPage = () => {
         </div>
 
         {/* Liste des chauffeurs */}
-        <div className="bg-white border border-gray-200 rounded">
+        <div className="bg-white border border-gray-200 rounded overflow-x-auto">
           {/* Header du tableau */}
-          <div className="grid grid-cols-12 gap-4 p-4 border-b border-gray-200 bg-gray-50 font-medium text-sm text-gray-700">
+          <div className="grid grid-cols-12 gap-4 p-4 border-b border-gray-200 bg-gray-50 font-medium text-sm text-gray-700 min-w-[1100px]">
             <div className="col-span-2">Nom Complet</div>
             <div className="col-span-3">Email</div>
             <div className="col-span-2">Téléphone</div>
@@ -276,7 +276,7 @@ const ChauffeursPage = () => {
               .map((chauffeur) => (
                 <div
                   key={chauffeur._id}
-                  className="grid grid-cols-12 gap-4 p-4 border-b border-gray-100 transition-colors text-sm"
+                  className="grid grid-cols-12 gap-4 p-4 border-b border-gray-100 transition-colors text-sm min-w-[1100px]"
                 >
                   <div className="col-span-2 flex items-center gap-2">
                     <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
@@ -338,25 +338,28 @@ const ChauffeursPage = () => {
           )}
 
           {/* No results after filter */}
-          {!loading && !error && chauffeurs.length > 0 && chauffeurs.filter((chauffeur) => {
-                const matchesSearch =
-                  chauffeur.fullname
-                    .toLowerCase()
-                    .includes(searchTerm.toLowerCase()) ||
-                  chauffeur.email
-                    .toLowerCase()
-                    .includes(searchTerm.toLowerCase());
+          {!loading &&
+            !error &&
+            chauffeurs.length > 0 &&
+            chauffeurs.filter((chauffeur) => {
+              const matchesSearch =
+                chauffeur.fullname
+                  .toLowerCase()
+                  .includes(searchTerm.toLowerCase()) ||
+                chauffeur.email
+                  .toLowerCase()
+                  .includes(searchTerm.toLowerCase());
 
-                const matchesStatus =
-                  statusFilter === "all" || chauffeur.status === statusFilter;
+              const matchesStatus =
+                statusFilter === "all" || chauffeur.status === statusFilter;
 
-                return matchesSearch && matchesStatus;
-              }).length === 0 && (
-            <div className="p-12 text-center text-gray-500">
-              <Search className="w-12 h-12 mx-auto mb-3 text-gray-400" />
-              <p>Aucun résultat trouvé</p>         
-            </div>
-          )}
+              return matchesSearch && matchesStatus;
+            }).length === 0 && (
+              <div className="p-12 text-center text-gray-500">
+                <Search className="w-12 h-12 mx-auto mb-3 text-gray-400" />
+                <p>Aucun résultat trouvé</p>
+              </div>
+            )}
         </div>
       </div>
 
