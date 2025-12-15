@@ -29,7 +29,14 @@ const Login = () => {
     const response = await login({ email: formData.email, password: formData.password });
 
     if (response.success) {
-      navigate('/admin/overview');
+      // Redirection basée sur le rôle
+      if (response.user.role === 'admin') {
+        navigate('/admin/overview');
+      } else if (response.user.role === 'chauffeur') {
+        navigate('/driver/overview');
+      } else {
+        navigate('/login');
+      }
     } else {
       setError(response.message || 'Email ou mot de passe incorrect');
     }

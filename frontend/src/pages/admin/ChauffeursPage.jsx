@@ -2,54 +2,53 @@ import { useState, useEffect } from "react";
 import {
   Plus,
   Search,
-  Truck,
-  Tag,
-  Gauge,
-  Calendar,
+  Mail,
+  Phone,
+  UserCircle,
+  User,
   Edit2,
   Trash2,
 } from "lucide-react";
-import Header from "../components/Header";
-import VehicleModal from "../components/VehicleModal";
-import DeleteConfirmationModal from "../components/DeleteConfirmationModal";
-import vehicleService from "../services/vehicleService";
+import Header from "../../components/Header";
+import ChauffeurModal from "../../components/ChauffeurModal";
+import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
+import userService from "../../services/userService";
 
-const CamionsPage = () => {
+const ChauffeursPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
-  const [editingId, setEditingId] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [editingId, setEditingId] = useState(null);
   const [formData, setFormData] = useState({
-    Immatriculation: "",
-    brand: "",
-    model: "",
-    year: "",
-    mileage: "",
-    status: "available",
+    fullname: "",
+    email: "",
+    password: "",
+    telephone: "",
+    status: "active",
   });
   const [errors, setErrors] = useState({});
-  const [camions, setCamions] = useState([]);
+  const [chauffeurs, setChauffeurs] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const fetchCamions = async () => {
+  const fetchChauffeurs = async () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await vehicleService.getAllVehicles("truck");
-      setCamions(response.data);
+      const response = await userService.getAllUsers();
+      setChauffeurs(response.data);
     } catch (err) {
-      console.error("Erreur lors du chargement des camions:", err);
-      setError("Impossible de charger les camions");
+      console.error("Erreur lors du chargement des chauffeurs:", err);
+      setError("Impossible de charger les chauffeurs");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchCamions();
+    fetchChauffeurs();
   }, []);
 
   const handleChange = (e) => {
@@ -63,22 +62,33 @@ const CamionsPage = () => {
   const validateForm = () => {
     const newErrors = {};
 
-    if (!formData.Immatriculation.trim()) {
-      newErrors.Immatriculation = "L'immatriculation est requise";
+    if (!formData.fullname.trim()) {
+      newErrors.fullname = "Le nom complet est requis";
+    } else if (formData.fullname.length < 3) {
+      newErrors.fullname = "Le nom doit contenir au moins 3 caractères";
     }
 
-    if (!formData.brand.trim()) {
-      newErrors.brand = "La marque est requise";
+    if (!formData.email.trim()) {
+      newErrors.email = "L'email est requis";
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = "Email invalide";
     }
 
-    if (!formData.model.trim()) {
-      newErrors.model = "Le modèle est requis";
+    if (!editingId) {
+      if (!formData.password.trim()) {
+        newErrors.password = "Le mot de passe est requis";
+      } else if (formData.password.length < 6) {
+        newErrors.password =
+          "Le mot de passe doit contenir au moins 6 caractères";
+      }
     }
 
-    if (!formData.mileage) {
-      newErrors.mileage = "Le kilométrage est requis";
-    } else if (isNaN(formData.mileage) || formData.mileage < 0) {
-      newErrors.mileage = "Le kilométrage doit être un nombre positif";
+    if (!formData.telephone.trim()) {
+      newErrors.telephone = "Le téléphone est requis";
+    } else if (
+      !/^\+?[0-9]{10,15}$/.test(formData.telephone.replace(/\s/g, ""))
+    ) {
+      newErrors.telephone = "Numéro de téléphone invalide";
     }
 
     setErrors(newErrors);
@@ -93,31 +103,34 @@ const CamionsPage = () => {
     }
 
     try {
-      const vehicleData = {
+      const userData = {
         ...formData,
-        type: "truck",
-        mileage: Number(formData.mileage),
-        year: formData.year ? Number(formData.year) : undefined,
+        role: "chauffeur",
       };
 
+      // En mode édition, ne pas envoyer le password
       if (editingId) {
-        await vehicleService.updateVehicle(editingId, vehicleData);
-      } else {
-        await vehicleService.createVehicle(vehicleData);
+        delete userData.password;
       }
 
-      await fetchCamions();
+      if (editingId) {
+        await userService.updateUser(editingId, userData);
+      } else {
+        await userService.createUser(userData);
+      }
+
+      await fetchChauffeurs();
       handleCloseModal();
     } catch (err) {
-      console.error("Erreur lors de la sauvegarde du camion:", err);
+      console.error("Erreur lors de la sauvegarde du chauffeur:", err);
 
       if (err.response?.data?.message) {
         setErrors({ submit: err.response.data.message });
       } else {
         setErrors({
           submit: editingId
-            ? "Erreur lors de la modification du camion"
-            : "Erreur lors de la création du camion",
+            ? "Erreur lors de la modification du chauffeur"
+            : "Erreur lors de la création du chauffeur",
         });
       }
     }
@@ -127,31 +140,29 @@ const CamionsPage = () => {
     setIsModalOpen(false);
     setEditingId(null);
     setFormData({
-      Immatriculation: "",
-      brand: "",
-      model: "",
-      year: "",
-      mileage: "",
-      status: "available",
+      fullname: "",
+      email: "",
+      password: "",
+      telephone: "",
+      status: "active",
     });
     setErrors({});
   };
 
-  const handleEdit = (camion) => {
-    setEditingId(camion._id);
+  const handleEdit = (chauffeur) => {
+    setEditingId(chauffeur._id);
     setFormData({
-      Immatriculation: camion.Immatriculation,
-      brand: camion.brand,
-      model: camion.model,
-      year: camion.year || "",
-      mileage: camion.mileage,
-      status: camion.status,
+      fullname: chauffeur.fullname,
+      email: chauffeur.email,
+      password: "",
+      telephone: chauffeur.telephone,
+      status: chauffeur.status,
     });
     setIsModalOpen(true);
   };
 
-  const handleDelete = (id, immatriculation) => {
-    setDeleteTarget({ id, immatriculation });
+  const handleDelete = (id, fullname) => {
+    setDeleteTarget({ id, fullname });
     setIsDeleteModalOpen(true);
   };
 
@@ -159,13 +170,13 @@ const CamionsPage = () => {
     if (!deleteTarget) return;
 
     try {
-      await vehicleService.deleteVehicle(deleteTarget.id);
-      await fetchCamions();
+      await userService.deleteUser(deleteTarget.id);
+      await fetchChauffeurs();
       setIsDeleteModalOpen(false);
       setDeleteTarget(null);
     } catch (err) {
       console.error("Erreur lors de la suppression:", err);
-      setErrors({ submit: "Erreur lors de la suppression du camion" });
+      setErrors({ submit: "Erreur lors de la suppression du chauffeur" });
       setIsDeleteModalOpen(false);
     }
   };
@@ -175,19 +186,9 @@ const CamionsPage = () => {
     setDeleteTarget(null);
   };
 
-  const getStatusLabel = (status) => {
-    const statusMap = {
-      available: "Disponible",
-      in_transit: "En transit",
-      maintenance: "Maintenance",
-      out_of_service: "Hors service",
-    };
-    return statusMap[status] || status;
-  };
-
   return (
     <div className="flex-1 flex flex-col">
-      <Header title="Camions" description="Gestion de la flotte de camions" />
+      <Header title="Chauffeurs" description="Gestion des chauffeurs" />
 
       <div className="flex-1 p-4 lg:p-6 bg-gray-50">
         {/* Header avec recherche, filtre et bouton */}
@@ -198,7 +199,7 @@ const CamionsPage = () => {
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <input
                   type="text"
-                  placeholder="Rechercher par immatriculation, marque ou modèle..."
+                  placeholder="Rechercher par nom, email ou téléphone..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full pl-10 pr-4 py-2 text-sm bg-white border border-gray-300 rounded outline-none focus:ring-1 focus:ring-slate-200"
@@ -211,10 +212,8 @@ const CamionsPage = () => {
                 className="px-4 py-2 text-sm bg-white border border-gray-300 rounded outline-none focus:ring-1 focus:ring-slate-200 cursor-pointer"
               >
                 <option value="all">Tous les statuts</option>
-                <option value="available">Disponible</option>
-                <option value="in_transit">En transit</option>
-                <option value="maintenance">Maintenance</option>
-                <option value="out_of_service">Hors service</option>
+                <option value="active">Actif</option>
+                <option value="inactive">Inactif</option>
               </select>
             </div>
 
@@ -223,22 +222,21 @@ const CamionsPage = () => {
               className="flex items-center gap-2 px-4 py-2 bg-slate-800 text-white text-sm font-medium rounded hover:bg-slate-900 transition-all whitespace-nowrap"
             >
               <Plus className="w-4 h-4" />
-              Nouveau Camion
+              Nouveau Chauffeur
             </button>
           </div>
         </div>
 
-        {/* Liste des camions */}
+        {/* Liste des chauffeurs */}
         <div className="bg-white border border-gray-200 rounded overflow-x-auto">
           {/* Header du tableau */}
-          <div className="grid grid-cols-12 gap-4 p-4 border-b border-gray-200 bg-gray-50 font-medium text-sm text-gray-700 min-w-[1200px]">
-            <div className="col-span-2">Immatriculation</div>
-            <div className="col-span-2">Marque</div>
-            <div className="col-span-2">Modèle</div>
-            <div className="col-span-1">Année</div>
-            <div className="col-span-2">Kilométrage</div>
+          <div className="grid grid-cols-12 gap-4 p-4 border-b border-gray-200 bg-gray-50 font-medium text-sm text-gray-700 min-w-[1100px]">
+            <div className="col-span-2">Nom Complet</div>
+            <div className="col-span-3">Email</div>
+            <div className="col-span-2">Téléphone</div>
+            <div className="col-span-2">Date de création</div>
             <div className="col-span-1">Statut</div>
-            <div className="col-span-2 text-right">Actions</div>
+            <div className="col-span-2 text-center">Actions</div>
           </div>
 
           {/* Loading */}
@@ -259,59 +257,60 @@ const CamionsPage = () => {
           {/* Lignes */}
           {!loading &&
             !error &&
-            camions.length > 0 &&
-            camions
-              .filter((camion) => {
+            chauffeurs.length > 0 &&
+            chauffeurs
+              .filter((chauffeur) => {
                 const matchesSearch =
-                  camion.Immatriculation.toLowerCase().includes(
-                    searchTerm.toLowerCase()
-                  ) ||
-                  camion.brand
+                  chauffeur.fullname
                     .toLowerCase()
                     .includes(searchTerm.toLowerCase()) ||
-                  camion.model.toLowerCase().includes(searchTerm.toLowerCase());
+                  chauffeur.email
+                    .toLowerCase()
+                    .includes(searchTerm.toLowerCase());
 
                 const matchesStatus =
-                  statusFilter === "all" || camion.status === statusFilter;
+                  statusFilter === "all" || chauffeur.status === statusFilter;
 
                 return matchesSearch && matchesStatus;
               })
-              .map((camion) => (
+              .map((chauffeur) => (
                 <div
-                  key={camion._id}
-                  className="grid grid-cols-12 gap-4 p-4 border-b border-gray-100 transition-colors text-sm min-w-[1200px]"
+                  key={chauffeur._id}
+                  className="grid grid-cols-12 gap-4 p-4 border-b border-gray-100 transition-colors text-sm min-w-[1100px]"
                 >
                   <div className="col-span-2 flex items-center gap-2">
                     <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
-                      <Tag className="w-4 h-4 text-gray-600" />
+                      <User className="w-4 h-4 text-gray-600" />
                     </div>
                     <span className="font-medium text-gray-900">
-                      {camion.Immatriculation}
+                      {chauffeur.fullname}
                     </span>
                   </div>
+                  <div className="col-span-3 flex items-center gap-2 text-gray-600">
+                    <Mail className="w-4 h-4" />
+                    {chauffeur.email}
+                  </div>
                   <div className="col-span-2 flex items-center gap-2 text-gray-600">
-                    <Truck className="w-4 h-4" />
-                    {camion.brand}
+                    <Phone className="w-4 h-4" />
+                    {chauffeur.telephone}
                   </div>
                   <div className="col-span-2 flex items-center text-gray-600">
-                    {camion.model}
-                  </div>
-                  <div className="col-span-1 flex items-center gap-2 text-gray-600">
-                    <Calendar className="w-4 h-4" />
-                    {camion.year || "-"}
-                  </div>
-                  <div className="col-span-2 flex items-center gap-2 text-gray-600">
-                    <Gauge className="w-4 h-4" />
-                    {camion.mileage.toLocaleString()} km
+                    {new Date(chauffeur.createdAt).toLocaleDateString("fr-FR")}
                   </div>
                   <div className="col-span-1 flex items-center">
-                    <span className="px-2 py-1 text-xs font-medium rounded text-gray-700 bg-gray-100">
-                      {getStatusLabel(camion.status)}
+                    <span
+                      className={`px-2 py-1 text-xs font-medium rounded ${
+                        chauffeur.status === "active"
+                          ? "bg-blue-50 text-blue-950"
+                          : "bg-gray-100 text-gray-600"
+                      }`}
+                    >
+                      {chauffeur.status === "active" ? "Actif" : "Inactif"}
                     </span>
                   </div>
                   <div className="col-span-2 flex items-center justify-end gap-2">
                     <button
-                      onClick={() => handleEdit(camion)}
+                      onClick={() => handleEdit(chauffeur)}
                       className="p-1.5 text-blue-700 rounded hover:bg-gray-50 hover:text-blue-800 transition-colors"
                       title="Modifier"
                     >
@@ -319,7 +318,7 @@ const CamionsPage = () => {
                     </button>
                     <button
                       onClick={() =>
-                        handleDelete(camion._id, camion.Immatriculation)
+                        handleDelete(chauffeur._id, chauffeur.fullname)
                       }
                       className="p-1.5 text-red-700 rounded hover:bg-gray-50 hover:text-red-800 transition-colors"
                       title="Supprimer"
@@ -331,27 +330,28 @@ const CamionsPage = () => {
               ))}
 
           {/* Empty state */}
-          {!loading && !error && camions.length === 0 && (
+          {!loading && !error && chauffeurs.length === 0 && (
             <div className="p-12 text-center text-gray-500">
-              <Truck className="w-12 h-12 mx-auto mb-3 text-gray-400" />
-              <p>Aucun camion trouvé</p>
+              <UserCircle className="w-12 h-12 mx-auto mb-3 text-gray-400" />
+              <p>Aucun chauffeur trouvé</p>
             </div>
           )}
 
           {/* No results after filter */}
           {!loading &&
             !error &&
-            camions.length > 0 &&
-            camions.filter((camion) => {
+            chauffeurs.length > 0 &&
+            chauffeurs.filter((chauffeur) => {
               const matchesSearch =
-                camion.Immatriculation.toLowerCase().includes(
-                  searchTerm.toLowerCase()
-                ) ||
-                camion.brand.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                camion.model.toLowerCase().includes(searchTerm.toLowerCase());
+                chauffeur.fullname
+                  .toLowerCase()
+                  .includes(searchTerm.toLowerCase()) ||
+                chauffeur.email
+                  .toLowerCase()
+                  .includes(searchTerm.toLowerCase());
 
               const matchesStatus =
-                statusFilter === "all" || camion.status === statusFilter;
+                statusFilter === "all" || chauffeur.status === statusFilter;
 
               return matchesSearch && matchesStatus;
             }).length === 0 && (
@@ -364,15 +364,14 @@ const CamionsPage = () => {
       </div>
 
       {/* Modal de création/édition */}
-      <VehicleModal
+      <ChauffeurModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
-        title={editingId ? "Modifier Camion" : "Nouveau Camion"}
+        title={editingId ? "Modifier Chauffeur" : "Nouveau Chauffeur"}
         formData={formData}
         errors={errors}
         onSubmit={handleSubmit}
         onChange={handleChange}
-        vehicleType="truck"
         isEditMode={!!editingId}
       />
 
@@ -381,8 +380,8 @@ const CamionsPage = () => {
         isOpen={isDeleteModalOpen}
         onClose={cancelDelete}
         onConfirm={confirmDelete}
-        itemName={deleteTarget?.immatriculation}
-        itemType="le camion"
+        itemName={deleteTarget?.fullname}
+        itemType="le chauffeur"
       />
 
       {/* Erreur de soumission */}
@@ -395,4 +394,4 @@ const CamionsPage = () => {
   );
 };
 
-export default CamionsPage;
+export default ChauffeursPage;

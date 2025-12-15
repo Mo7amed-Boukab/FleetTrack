@@ -9,12 +9,12 @@ import {
   Trash2,
   Link,
 } from "lucide-react";
-import Header from "../components/Header";
-import TireModal from "../components/TireModal";
-import AssignTireModal from "../components/AssignTireModal";
-import DeleteConfirmationModal from "../components/DeleteConfirmationModal";
-import tireService from "../services/tireService";
-import vehicleService from "../services/vehicleService";
+import Header from "../../components/Header";
+import TireModal from "../../components/TireModal";
+import AssignTireModal from "../../components/AssignTireModal";
+import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
+import tireService from "../../services/tireService";
+import vehicleService from "../../services/vehicleService";
 
 const PneusPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);

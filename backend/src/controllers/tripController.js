@@ -1,6 +1,7 @@
 const Trip = require("../models/Trip");
 const User = require("../models/User");
 const Vehicle = require("../models/Vehicle");
+const { checkAndUpdateMaintenance } = require("../utils/maintenanceRules");
 
 class TripController {
   /**
@@ -263,6 +264,23 @@ class TripController {
       if (status === "completed" && arrival?.mileage) {
         await Vehicle.findByIdAndUpdate(trip.truck, {
           mileage: arrival.mileage,
+        });
+        
+        // Vérifier les règles de maintenance 
+        await checkAndUpdateMaintenance(trip.truck);
+        
+        // Recharger le véhicule pour avoir le statut à jour
+        const updatedVehicle = await Vehicle.findById(trip.truck);
+        
+        // Recharger le trajet avec le véhicule mis à jour
+        const finalTrip = await Trip.findById(updatedTrip._id)
+          .populate("driver", "fullname telephone email")
+          .populate("truck", "Immatriculation brand model type")
+          .populate("trailer", "Immatriculation brand model type");
+          
+        return res.status(200).json({
+          success: true,
+          data: finalTrip,
         });
       }
 

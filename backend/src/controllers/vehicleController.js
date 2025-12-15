@@ -83,7 +83,6 @@ class VehicleController {
       if (!vehicle) {
         return res.status(404).json({ message: "Vehicle not found" });
       }
-
       // Vérifier les règles de maintenance
       await checkAndUpdateMaintenance(vehicle._id);
       // Recharger le véhicule pour avoir le statut à jour

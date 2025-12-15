@@ -9,10 +9,10 @@ import {
   Edit2,
   Trash2,
 } from "lucide-react";
-import Header from "../components/Header";
-import VehicleModal from "../components/VehicleModal";
-import DeleteConfirmationModal from "../components/DeleteConfirmationModal";
-import vehicleService from "../services/vehicleService";
+import Header from "../../components/Header";
+import VehicleModal from "../../components/VehicleModal";
+import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
+import vehicleService from "../../services/vehicleService";
 
 const RemorquesPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);

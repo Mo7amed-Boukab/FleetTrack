@@ -11,12 +11,12 @@ import {
   Edit2,
   Trash2,
 } from "lucide-react";
-import Header from "../components/Header";
-import DeleteConfirmationModal from "../components/DeleteConfirmationModal";
-import TripModal from "../components/TripModal";
-import tripService from "../services/tripService";
-import userService from "../services/userService";
-import vehicleService from "../services/vehicleService";
+import Header from "../../components/Header";
+import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
+import TripModal from "../../components/TripModal";
+import tripService from "../../services/tripService";
+import userService from "../../services/userService";
+import vehicleService from "../../services/vehicleService";
 
 const TrajetsPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);

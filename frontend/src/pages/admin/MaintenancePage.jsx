@@ -9,10 +9,10 @@ import {
   Gauge,
   CircleDot,
 } from "lucide-react";
-import Header from "../components/Header";
-import CompleteMaintenanceModal from "../components/CompleteMaintenanceModal";
-import vehicleService from "../services/vehicleService";
-import tireService from "../services/tireService";
+import Header from "../../components/Header";
+import CompleteMaintenanceModal from "../../components/CompleteMaintenanceModal";
+import vehicleService from "../../services/vehicleService";
+import tireService from "../../services/tireService";
 
 const MaintenancePage = () => {
   const [isMaintenanceModalOpen, setIsMaintenanceModalOpen] = useState(false);

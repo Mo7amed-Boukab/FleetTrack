@@ -1,4 +1,4 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import {
   LayoutDashboard,
@@ -12,10 +12,18 @@ import {
   User,
 } from "lucide-react";
 import vehicleService from "../services/vehicleService";
+import { useAuth } from "../context/AuthContext";
 
 const Sidebar = ({ isOpen, onClose }) => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { logout } = useAuth();
   const [maintenanceCount, setMaintenanceCount] = useState(0);
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
 
   useEffect(() => {
     const fetchMaintenanceCount = async () => {
@@ -69,10 +77,26 @@ const Sidebar = ({ isOpen, onClose }) => {
       >
         {/* Header */}
         <div className="h-20 px-5 border-b border-gray-200 flex items-center gap-3">
-          <div className="w-9 h-9 bg-slate-800 rounded-sm flex items-center justify-center">
-            <Truck className="w-5 h-5 text-white" />
-          </div>
-          <span className="text-xl font-bold text-gray-900">FleetTrack</span>
+          <Link to="/driver/overview" className="flex items-center gap-2">
+            <div className="w-9 h-9 bg-slate-800 rounded flex items-center justify-center">
+              <svg
+                className="w-5 h-5 text-white"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M13 10V3L4 14h7v7l9-11h-7z"
+                />
+              </svg>
+            </div>
+            <span className="font-semibold text-lg text-gray-800">
+              FleetTrack
+            </span>
+          </Link>
         </div>
 
         {/* Navigation */}
@@ -122,13 +146,22 @@ const Sidebar = ({ isOpen, onClose }) => {
             <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
               <User className="w-5 h-5 text-gray-500" />
             </div>
-            <div>
-              <p className="text-sm font-semibold text-gray-900">Admin</p>
-              <p className="text-xs text-gray-500">mohamed@gmail.com</p>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-gray-900 truncate">
+                {JSON.parse(localStorage.getItem("user") || "{}")?.fullname ||
+                  "Admin"}
+              </p>
+              <p className="text-xs text-gray-500 truncate">
+                {JSON.parse(localStorage.getItem("user") || "{}")?.email ||
+                  "admin@fleet.com"}
+              </p>
             </div>
           </div>
 
-          <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-sm text-sm text-red-600 hover:bg-red-50 transition">
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-sm text-sm text-red-600 hover:bg-red-50 transition"
+          >
             <LogOut className="w-5 h-5" />
             <span>Log out</span>
           </button>

@@ -8,11 +8,11 @@ import {
   Calendar,
   Clock,
 } from "lucide-react";
-import StatsCard from "../components/StatsCard";
-import Header from "../components/Header";
-import vehicleService from "../services/vehicleService";
-import tripService from "../services/tripService";
-import userService from "../services/userService";
+import StatsCard from "../../components/StatsCard";
+import Header from "../../components/Header";
+import vehicleService from "../../services/vehicleService";
+import tripService from "../../services/tripService";
+import userService from "../../services/userService";
 
 const OverviewPage = () => {
   const [stats, setStats] = useState({
