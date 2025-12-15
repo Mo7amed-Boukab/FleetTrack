@@ -12,4 +12,6 @@ router.post('/', authorize('admin'), vehicleController.createVehicle);
 router.put('/:id', authorize('admin'), vehicleController.updateVehicle);
 router.delete('/:id', authorize('admin'), vehicleController.deleteVehicle);
 
+router.post('/:id/complete-maintenance', authorize('admin'), vehicleController.completeMaintenance);
+
 module.exports = router;

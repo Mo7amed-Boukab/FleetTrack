@@ -257,6 +257,17 @@ const TrajetsPage = () => {
   };
 
   const filteredTrajets = trajets.filter((trajet) => {
+    // Vérifier que le trajet et ses propriétés existent
+    if (
+      !trajet ||
+      !trajet.departure ||
+      !trajet.arrival ||
+      !trajet.driver ||
+      !trajet.truck
+    ) {
+      return false;
+    }
+
     const matchesSearch =
       trajet.departure.location
         .toLowerCase()
@@ -275,11 +286,14 @@ const TrajetsPage = () => {
     return matchesSearch && matchesStatus;
   });
 
+  // Filtrer uniquement les trajets valides pour les statistiques
+  const validTrajets = trajets.filter((t) => t && t.status);
+
   const stats = {
-    total: trajets.length,
-    planned: trajets.filter((t) => t.status === "planned").length,
-    inProgress: trajets.filter((t) => t.status === "in_progress").length,
-    completed: trajets.filter((t) => t.status === "completed").length,
+    total: validTrajets.length,
+    planned: validTrajets.filter((t) => t.status === "planned").length,
+    inProgress: validTrajets.filter((t) => t.status === "in_progress").length,
+    completed: validTrajets.filter((t) => t.status === "completed").length,
   };
 
   return (

@@ -181,35 +181,37 @@ const VehicleModal = ({
                 )}
               </div>
             ) : (
-              /* Statut pour les remorques */
-              <div>
-                <label
-                  htmlFor="status"
-                  className="block text-sm font-medium text-gray-700 mb-1.5"
-                >
-                  Statut
-                </label>
-                <div className="relative">
-                  <select
-                    id="status"
-                    name="status"
-                    value={formData.status}
-                    onChange={onChange}
-                    className="w-full appearance-none px-3 py-2 text-sm border border-gray-300 rounded outline-none focus:ring-1 focus:ring-slate-200 bg-white cursor-pointer transition-colors"
+              /* Statut pour les remorques (uniquement en mode édition) */
+              isEditMode && (
+                <div>
+                  <label
+                    htmlFor="status"
+                    className="block text-sm font-medium text-gray-700 mb-1.5"
                   >
-                    <option value="available">Disponible</option>
-                    <option value="in_transit">En transit</option>
-                    <option value="maintenance">En maintenance</option>
-                    <option value="out_of_service">Hors service</option>
-                  </select>
-                  <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                    Statut
+                  </label>
+                  <div className="relative">
+                    <select
+                      id="status"
+                      name="status"
+                      value={formData.status}
+                      onChange={onChange}
+                      className="w-full appearance-none px-3 py-2 text-sm border border-gray-300 rounded outline-none focus:ring-1 focus:ring-slate-200 bg-white cursor-pointer transition-colors"
+                    >
+                      <option value="available">Disponible</option>
+                      <option value="in_transit">En transit</option>
+                      <option value="maintenance">En maintenance</option>
+                      <option value="out_of_service">Hors service</option>
+                    </select>
+                    <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                  </div>
                 </div>
-              </div>
+              )
             )}
           </div>
 
-          {/* Statut */}
-          {vehicleType === "truck" && (
+          {/* Statut (uniquement en mode édition) */}
+          {vehicleType === "truck" && isEditMode && (
             <div>
               <label
                 htmlFor="status"

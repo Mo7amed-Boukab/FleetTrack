@@ -9,18 +9,40 @@ const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(localStorage.getItem("token") || null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true); // État de chargement initial
 
+  // Vérification initiale au chargement de l'app
   useEffect(() => {
-    if (token) {
+    const initAuth = () => {
+      const storedToken = localStorage.getItem("token");
       const storedUser = localStorage.getItem("user");
-      if (storedUser) {
+
+      if (storedToken && storedUser) {
+        setToken(storedToken);
         setUser(JSON.parse(storedUser));
         setIsAuthenticated(true);
+      } else {
+        setIsAuthenticated(false);
       }
-    } else {
-      setIsAuthenticated(false);
+      setInitialLoading(false);
+    };
+
+    initAuth();
+  }, []);
+
+  useEffect(() => {
+    if (!initialLoading) {
+      if (token) {
+        const storedUser = localStorage.getItem("user");
+        if (storedUser) {
+          setUser(JSON.parse(storedUser));
+          setIsAuthenticated(true);
+        }
+      } else {
+        setIsAuthenticated(false);
+      }
     }
-  }, [token]);
+  }, [token, initialLoading]);
 
   const login = async (credentials) => {
     setLoading(true);
@@ -41,7 +63,10 @@ const AuthProvider = ({ children }) => {
 
       return { success: true, user: userData };
     } catch (error) {
-      console.error("Erreur lors de la connexion :", error.response?.data?.message || error.message );
+      console.error(
+        "Erreur lors de la connexion :",
+        error.response?.data?.message || error.message
+      );
       return {
         success: false,
         message: error.response?.data?.message || "Erreur de connexion",
@@ -61,7 +86,17 @@ const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, isAuthenticated, loading, login, logout }} >
+    <AuthContext.Provider
+      value={{
+        user,
+        token,
+        isAuthenticated,
+        loading,
+        initialLoading,
+        login,
+        logout,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

@@ -37,10 +37,30 @@ const vehicleSchema = new mongoose.Schema(
     },
 
     maintenance: {
-      lastServiceDate: Date,
-      lastServiceMileage: Number,
-      nextServiceDate: Date,
-      nextServiceMileage: Number,
+      lastServiceDate: {
+        type: Date,
+        default: Date.now
+      },
+      lastServiceMileage: {
+        type: Number,
+        default: function() {
+          return this.mileage || 0;
+        }
+      },
+      nextServiceDate: {
+        type: Date,
+        default: function() {
+          const date = new Date();
+          date.setDate(date.getDate() + 90); // +3 mois (90 jours)
+          return date;
+        }
+      },
+      nextServiceMileage: {
+        type: Number,
+        default: function() {
+          return (this.mileage || 0) + 1000;
+        }
+      },
     },
   },
   { timestamps: true }

@@ -1,5 +1,6 @@
 const Tire = require("../models/Tire");
 const Vehicle = require("../models/Vehicle");
+const { checkAndUpdateMaintenance } = require('../utils/maintenanceRules');
 
 class TireController {
   /**
@@ -113,6 +114,11 @@ class TireController {
         runValidators: true,
       }).populate("vehicle", "Immatriculation brand model type");
 
+      // Vérifier maintenance
+      if (tire.vehicle && condition) {
+        await checkAndUpdateMaintenance(tire.vehicle);
+      }
+
       res.status(200).json({
         success: true,
         data: tire,
@@ -206,6 +212,9 @@ class TireController {
         "Immatriculation brand model type"
       );
 
+      // Vérifier maintenance du véhicule
+      await checkAndUpdateMaintenance(vehicleId);
+
       res.status(200).json({
         success: true,
         data: updatedTire,
@@ -228,10 +237,17 @@ class TireController {
         return res.status(404).json({ message: "Tire not found" });
       }
 
+      const oldVehicleId = tire.vehicle;
+      
       tire.vehicle = null;
       tire.position = "unassigned";
       tire.status = "in_stock";
       await tire.save();
+
+      // Vérifier maintenance de l'ancien véhicule
+      if (oldVehicleId) {
+        await checkAndUpdateMaintenance(oldVehicleId);
+      }
 
       res.status(200).json({
         success: true,
