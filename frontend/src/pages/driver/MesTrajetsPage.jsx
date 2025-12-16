@@ -118,7 +118,9 @@ const MesTrajetsPage = () => {
       trip.departure?.location
         ?.toLowerCase()
         .includes(searchTerm.toLowerCase()) ||
-      trip.arrival?.location?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      trip.arrival?.location
+        ?.toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
       trip.truck?.Immatriculation?.toLowerCase().includes(
         searchTerm.toLowerCase()
       );
