@@ -1,0 +1,43 @@
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: fleet-track_mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - fleet-network
+
+  backend:
+    build: ./backend
+    container_name: fleet-track_backend
+    ports:
+      - "5000:5000"
+    environment:
+      - PORT=5000
+      - MONGO_URI=mongodb://mongodb:27017/fleet-track
+      - JWT_SECRET=9ba43a3a7cc772560224db147e43f68b
+    depends_on:
+      - mongodb
+    networks:
+      - fleet-network
+
+  frontend:
+    build: ./frontend
+    container_name: fleet-track_frontend
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://localhost:5000/api
+    depends_on:
+      - backend
+    networks:
+      - fleet-network
+
+networks:
+  fleet-network:
+    driver: bridge
+
+volumes:
+  mongo-data:
