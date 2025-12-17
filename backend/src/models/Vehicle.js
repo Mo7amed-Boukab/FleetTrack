@@ -66,7 +66,7 @@ const vehicleSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Méthode virtuelle pour récupérer les pneus assignés
+// Méthode pour récupérer les pneus assignés
 vehicleSchema.virtual("tires", {
   ref: "Tire",
   localField: "_id",
